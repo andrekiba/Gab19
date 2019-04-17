@@ -1,9 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netstandard20</TargetFramework>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.AuthTokens" Version="1.0.0-beta6" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.MicrosoftGraph" Version="1.0.0-beta6" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.26" />
   </ItemGroup>
   <ItemGroup>
@@ -15,4 +17,16 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+
+  <PropertyGroup>
+    <_IsFunctionsSdkBuild Condition="$(_FunctionsTaskFramework) != ''">true</_IsFunctionsSdkBuild>
+    <_FunctionsExtensionsDir>$(TargetDir)</_FunctionsExtensionsDir>
+    <_FunctionsExtensionsDir Condition="$(_IsFunctionsSdkBuild) == 'true'">$(_FunctionsExtensionsDir)bin</_FunctionsExtensionsDir>
+  </PropertyGroup>
+
+  <Target Name="CopyExtensionsJson" AfterTargets="_GenerateFunctionsAndCopyContentFiles">
+    <Message Importance="High" Text="Overwritting extensions.json file with one from build." />
+
+    <Copy Condition="$(_IsFunctionsSdkBuild) == 'true' AND Exists('$(_FunctionsExtensionsDir)\extensions.json')" SourceFiles="$(_FunctionsExtensionsDir)\extensions.json" DestinationFiles="$(PublishDir)bin\extensions.json" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+  </Target>
 </Project>

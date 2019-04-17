@@ -13,11 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{164DF602-D61
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{215F7B48-7475-4B0B-BA3C-BACDDE0CD7D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gab.Functions", "Gab.Functions\Gab.Functions.csproj", "{C98E24BC-DE7B-4593-B4FC-6A9E8034F04A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gab.Functions", "Gab.Functions\Gab.Functions.csproj", "{C98E24BC-DE7B-4593-B4FC-6A9E8034F04A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{DCC5E99C-595D-447F-942A-3AA9E6E8DC2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gab.Shared", "Gab.Shared\Gab.Shared.csproj", "{C8DDA8D7-CF4C-4ACA-B83F-16644C44AF3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gab.Shared", "Gab.Shared\Gab.Shared.csproj", "{C8DDA8D7-CF4C-4ACA-B83F-16644C44AF3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
