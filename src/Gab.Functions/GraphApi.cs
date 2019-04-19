@@ -42,12 +42,13 @@ namespace Gab.Functions
 
         [FunctionName("MeetingRooms")]
         public async Task<IActionResult> MeetingRooms(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "meetingRooms")] HttpRequest req,
-            [Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "meetingRooms")] HttpRequest req
+            //[Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token
+            )
         {
             try
             {
-                var graphClient = GetGraphClient(configuration.GraphV1, token);
+                var graphClient = GetGraphClient(configuration.GraphV1);
 
                 var result = await graphClient.Users["b46397cf-4e6f-4f3d-9134-0d8b70646548"].People.Request()
                     .Filter("personType/subclass eq 'Room'")
@@ -62,8 +63,7 @@ namespace Gab.Functions
 
                 return new OkObjectResult(Result.Ok(meetingRooms));
 
-                //var client = new HttpClient();
-                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                //var client = await GetGraphHttpClient();
                 //await client.GetAsync("https://graph.microsoft.com/beta/users/0e17c9c5-9a12-47fd-b7dc-44f53a986dd6/findRooms");
             }
             catch (Exception e)
@@ -76,12 +76,11 @@ namespace Gab.Functions
 
         [FunctionName("CalendarView")]
         public async Task<IActionResult> CalendarView(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "calendarView")] HttpRequest req,
-            [Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "calendarView")] HttpRequest req)
         {
             try
             {
-                var graphClient = GetGraphClient(configuration.GraphV1, token);
+                var graphClient = GetGraphClient(configuration.GraphV1);
 
                 var user = req.Query["user"];
                 var startDateTime = new QueryOption("startDateTime", req.Query["start"]);
@@ -117,20 +116,17 @@ namespace Gab.Functions
 
         [FunctionName("CreateEvent")]
         public async Task<IActionResult> CreateEvent(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "event")] HttpRequest req,
-            [Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "event")] HttpRequest req)
         {
             try
             {
-                var graphClient = GetGraphClient(configuration.GraphV1, token);
+                var graphClient = GetGraphClient(configuration.GraphV1);
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var input = JsonConvert.DeserializeObject<CreateEvent>(requestBody);
 
                 var timeZone = input.TimeZone;
 
-                var client = new HttpClient();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                client.DefaultRequestHeaders.Add("Prefer", $"outlook.timezone=\"{timeZone}\"");
+                var client = await GetGraphHttpClient(timeZone);
 
                 var nearestUtc = DateTime.UtcNow.RoundToNearest(TimeSpan.FromMinutes(15));
                 var nearest = TimeZoneInfo.ConvertTimeFromUtc(nearestUtc, TimeZoneInfo.FindSystemTimeZoneById(timeZone));
@@ -178,17 +174,27 @@ namespace Gab.Functions
             }
         }
 
-        static GraphServiceClient GetGraphClient(string endpoint, string token)
+        GraphServiceClient GetGraphClient(string endpoint)
         {
             return new GraphServiceClient(endpoint, new DelegateAuthenticationProvider(
-                rm =>
+                async rm =>
                 {
-                    rm.Headers.Authorization = new AuthenticationHeaderValue("bearer", token);
-                    return Task.CompletedTask;
+                    var token = await GetGraphToken();
+                    rm.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }));
         }
+        async Task<HttpClient> GetGraphHttpClient(string timeZone = null)
+        {
+            var token = await GetGraphToken();
 
-        async Task<string> GetToken()
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Add("Accept", "application/json;odata.metadata=none");
+            client.DefaultRequestHeaders.Add("Prefer", timeZone != null ? $"outlook.timezone=\"{timeZone}\"" : "outlook.timezone=\"W. Europe Standard Time\"");
+
+            return client;
+        }
+        async Task<string> GetGraphToken()
         {
             var authContext = new AuthenticationContext(configuration.OpenIdIssuer);
             var result = await authContext.AcquireTokenAsync(configuration.GraphEndpoint, new ClientCredential(configuration.ClientId, configuration.ClientSecret));

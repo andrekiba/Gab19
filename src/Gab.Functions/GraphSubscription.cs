@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Gab.Functions.Configuration;
 using Gab.Shared.Base;
@@ -17,7 +13,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Serilog;
@@ -47,31 +42,13 @@ namespace Gab.Functions
         [FunctionName("Subscribe")]
         public async Task<IActionResult> Subscribe(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscription")] HttpRequest req,
-            [Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token,
-            [Table("subscriptions", Connection = "AzureWebJobsStorage")] IAsyncCollector<SubEntity> subTable,
-            
-            IBinder binder)
-            //[GraphWebhookSubscription(
-            //    Identity = TokenIdentityMode.ClientCredentials,
-            //    IdentityProvider = "AAD",
-            //    SubscriptionResource = "users/0e17c9c5-9a12-47fd-b7dc-44f53a986dd6/calendar/events",
-            //    ChangeTypes = new[] { GraphWebhookChangeType.Created, GraphWebhookChangeType.Updated, GraphWebhookChangeType.Deleted },
-            //    Action = GraphWebhookSubscriptionAction.Create)] out string clientState)        
+            [Table("subscriptions", Connection = "AzureWebJobsStorage")] IAsyncCollector<SubEntity> subTable)        
         {
             try
             {
-                var graphClient = GetGraphClient(configuration.GraphV1, token);
+                var graphClient = GetGraphClient(configuration.GraphV1);
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var sub = JsonConvert.DeserializeObject<CreateSub>(requestBody);
-
-                //var subscription = new Microsoft.Graph.Subscription
-                //{
-                //    ChangeType = "updated,deleted",
-                //    ClientState = "mysecret",
-                //    ExpirationDateTime = DateTime.UtcNow.AddDays(2),
-                //    NotificationUrl = "your notification url",
-                //    Resource = "Users"
-                //};
 
                 var subscription = new Subscription
                 {
@@ -83,12 +60,6 @@ namespace Gab.Functions
                 };
 
                 var createdSub = await graphClient.Subscriptions.Request().AddAsync(subscription);
-
-                //var dynamicBlobBinding = new BlobAttribute($"subscriptions/{createdSub.Id}");
-                //using (var writer = binder.Bind<TextWriter>(dynamicBlobBinding))
-                //{
-                //    writer.Write(JsonConvert.SerializeObject(createdSub));
-                //}
 
                 await subTable.AddAsync(createdSub.ToSubEntity());
 
@@ -104,13 +75,54 @@ namespace Gab.Functions
             }
         }
 
-        [FunctionName("OnEventChange")]
-        public void OnEventChange([GraphWebhookTrigger(ResourceType = "#Microsoft.Graph.Event")] Event ev)
+        [FunctionName("NotificationHandler")]
+        public async Task<IActionResult> NotificationHandler(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "notification")] HttpRequest req,
+            [Queue("notifications", Connection = "AzureWebJobsStorage")] IAsyncCollector<Notification> notifcations)
         {
             try
             {
-                var id = ev.Id;
-                var calendar = ev.Calendar.Name;
+                string validationToken = req.Query["validationToken"];
+
+                //one time test subsciption
+                if (!validationToken.IsNullOrWhiteSpace())
+                    return new OkObjectResult(validationToken);
+
+                var data = await new StreamReader(req.Body).ReadToEndAsync();
+                dynamic result = JsonConvert.DeserializeObject(data);
+                var not = result.value.First;
+
+                var notification = new Notification
+                {
+                    Resource = new Resource
+                    {
+                        Id = not.resourceData.id,
+                        Path = not.resource
+                    },
+                    ChangeType = not.changeType
+                };
+                await notifcations.AddAsync(notification);
+
+                return new AcceptedResult();
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return new ObjectResult(StatusCodes.Status500InternalServerError);
+            }            
+        }
+
+        [FunctionName("Notifier")]
+        public async Task Notifier(
+            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification)
+        {
+            try
+            {
+                var graphClient = GetGraphClient(configuration.GraphV1);
+                var user = notification.Resource.Path.Split('/')[1];
+                var ev = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
+                Console.WriteLine(ev.Subject);
             }
             catch (Exception e)
             {
@@ -121,37 +133,58 @@ namespace Gab.Functions
 
         [FunctionName("UpdateSubscriptions")]
         public async Task UpdateSubscriptions(
-            [TimerTrigger("00:01:00", RunOnStartup = true)]TimerInfo timer,
-            [Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token,
+            [TimerTrigger("12:00:00", RunOnStartup = true)]TimerInfo timer,
             [Table("subscriptions", Connection = "AzureWebJobsStorage")] CloudTable subTable)
         {
-            var graphClient = GetGraphClient(configuration.GraphBeta, token);
-
-            var query = new TableQuery<SubEntity>();
-            var segment = await subTable.ExecuteQuerySegmentedAsync(query, null);
-            var subs = segment.ToList();
-
-            foreach (var sub in subs)
+            try
             {
-                var subscription = await graphClient.Subscriptions[sub.RowKey].Request().GetAsync();
-                subscription.ExpirationDateTime = subscription.ExpirationDateTime?.AddDays(1) ?? DateTimeOffset.UtcNow.AddDays(1);
-                var updatedSub = await graphClient.Subscriptions[sub.RowKey].Request().UpdateAsync(subscription);
-                sub.ExpirationDateTime = updatedSub.ExpirationDateTime;
-                var replaceOperation = TableOperation.Replace(sub);
-                await subTable.ExecuteAsync(replaceOperation);
+                var graphClient = GetGraphClient(configuration.GraphV1);
 
-                log.Information($"Updated existing subscription with id:{sub.RowKey}");
+                var query = new TableQuery<SubEntity>();
+                var segment = await subTable.ExecuteQuerySegmentedAsync(query, null);
+                var subs = segment.ToList();
+
+                foreach (var sub in subs)
+                {
+                    var subscription = await graphClient.Subscriptions[sub.RowKey].Request().GetAsync();
+                    if (subscription.ExpirationDateTime.HasValue)
+                    {
+                        if(subscription.ExpirationDateTime.Value - DateTimeOffset.UtcNow < TimeSpan.FromHours(24))
+                            subscription.ExpirationDateTime = subscription.ExpirationDateTime.Value.AddDays(1);
+                    }
+                    else
+                        subscription.ExpirationDateTime = DateTimeOffset.UtcNow.AddDays(1);
+
+                    var updatedSub = await graphClient.Subscriptions[sub.RowKey].Request().UpdateAsync(subscription);
+                    sub.ExpirationDateTime = updatedSub.ExpirationDateTime;
+                    var replaceOperation = TableOperation.Replace(sub);
+                    await subTable.ExecuteAsync(replaceOperation);
+
+                    log.Information($"Updated existing subscription with id:{sub.RowKey}");
+                }
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
             }
         }
 
-        static GraphServiceClient GetGraphClient(string endpoint, string token)
+        GraphServiceClient GetGraphClient(string endpoint)
         {
             return new GraphServiceClient(endpoint, new DelegateAuthenticationProvider(
-                rm =>
+                async rm =>
                 {
-                    rm.Headers.Authorization = new AuthenticationHeaderValue("bearer", token);
-                    return Task.CompletedTask;
+                    var token = await GetGraphToken();
+                    rm.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }));
+        }
+
+        async Task<string> GetGraphToken()
+        {
+            var authContext = new AuthenticationContext(configuration.OpenIdIssuer);
+            var result = await authContext.AcquireTokenAsync(configuration.GraphEndpoint, new ClientCredential(configuration.ClientId, configuration.ClientSecret));
+            return result.AccessToken;
         }
     }
 }
