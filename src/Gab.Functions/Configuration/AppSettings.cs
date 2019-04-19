@@ -11,7 +11,7 @@ namespace Gab.Functions.Configuration
         public string ClientSecret { get; }
         public string TenantId { get; }
         public string OpenIdIssuer { get; }
-        public string GraphEndpoint { get; }
+        public string GraphBaseUrl { get; }
         public string GraphV1 { get; }
         public string GraphBeta { get; }
 
@@ -24,13 +24,13 @@ namespace Gab.Functions.Configuration
                 .AddEnvironmentVariables()
                 .Build();
 
-            ClientId = config.GetValue<string>("WEBSITE_AUTH_CLIENT_ID");
-            ClientSecret = config.GetValue<string>("WEBSITE_AUTH_CLIENT_SECRET");
+            ClientId = config.GetValue<string>("ClientId");
+            ClientSecret = config.GetValue<string>("ClientSecret");
             TenantId = config.GetValue<string>("TenantId");
-            OpenIdIssuer = config.GetValue<string>("WEBSITE_AUTH_OPENID_ISSUER");
-            GraphEndpoint = config.GetValue<string>("GraphEndpoint");
-            GraphV1 = $"{GraphEndpoint}v1.0";
-            GraphBeta = $"{GraphEndpoint}beta";
+            OpenIdIssuer = config.GetValue<string>("OpenIdIssuer");
+            GraphBaseUrl = config.GetValue<string>("GraphBaseUrl");
+            GraphV1 = $"{GraphBaseUrl}v1.0";
+            GraphBeta = $"{GraphBaseUrl}beta";
         }
 
         public string GetValue(string key) => config.GetValue<string>(key);
