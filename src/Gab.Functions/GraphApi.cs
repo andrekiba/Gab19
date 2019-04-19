@@ -47,7 +47,7 @@ namespace Gab.Functions
         {
             try
             {
-                var graphClient = GetGraphClient(token);
+                var graphClient = GetGraphClient(configuration.GraphV1, token);
 
                 var result = await graphClient.Users["b46397cf-4e6f-4f3d-9134-0d8b70646548"].People.Request()
                     .Filter("personType/subclass eq 'Room'")
@@ -81,7 +81,7 @@ namespace Gab.Functions
         {
             try
             {
-                var graphClient = GetGraphClient(token);
+                var graphClient = GetGraphClient(configuration.GraphV1, token);
 
                 var user = req.Query["user"];
                 var startDateTime = new QueryOption("startDateTime", req.Query["start"]);
@@ -122,7 +122,7 @@ namespace Gab.Functions
         {
             try
             {
-                var graphClient = GetGraphClient(token);
+                var graphClient = GetGraphClient(configuration.GraphV1, token);
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var input = JsonConvert.DeserializeObject<CreateEvent>(requestBody);
 
@@ -178,9 +178,9 @@ namespace Gab.Functions
             }
         }
 
-        GraphServiceClient GetGraphClient(string token)
+        static GraphServiceClient GetGraphClient(string endpoint, string token)
         {
-            return new GraphServiceClient(configuration.GraphV1, new DelegateAuthenticationProvider(
+            return new GraphServiceClient(endpoint, new DelegateAuthenticationProvider(
                 rm =>
                 {
                     rm.Headers.Authorization = new AuthenticationHeaderValue("bearer", token);
