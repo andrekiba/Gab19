@@ -8,6 +8,13 @@ namespace Gab.Shared.Base
         {
             return string.IsNullOrWhiteSpace(value);
         }
+
+        public static string UppercaseFirst(this string value)
+        {
+            if (value.IsNullOrWhiteSpace())
+                return string.Empty;
+            return char.ToUpper(value[0]) + value.Substring(1).ToLower();
+        }
     }
 
     public static class DateTimeExtensions

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Gab.Functions.Configuration;
@@ -11,13 +10,14 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Microsoft.Graph;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Serilog;
 using ILogger = Serilog.ILogger;
-using Event = Microsoft.Graph.Event;
+using Subscription = Microsoft.Graph.Subscription;
 
 namespace Gab.Functions
 {
@@ -39,16 +39,18 @@ namespace Gab.Functions
                 .CreateLogger();
         }
 
+        #region Functions
+
         [FunctionName("Subscribe")]
         public async Task<IActionResult> Subscribe(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscription")] HttpRequest req,
-            [Table("subscriptions", Connection = "AzureWebJobsStorage")] IAsyncCollector<SubEntity> subTable)        
+            [Table("subscriptions", Connection = "AzureWebJobsStorage")] IAsyncCollector<SubscriptionEntity> subTable)        
         {
             try
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var sub = JsonConvert.DeserializeObject<CreateSub>(requestBody);
+                var sub = JsonConvert.DeserializeObject<CreateSubscription>(requestBody);
 
                 var subscription = new Subscription
                 {
@@ -61,7 +63,7 @@ namespace Gab.Functions
 
                 var createdSub = await graphClient.Subscriptions.Request().AddAsync(subscription);
 
-                await subTable.AddAsync(createdSub.ToSubEntity());
+                await subTable.AddAsync(createdSub.ToSubscriptionEntity());
 
                 log.Information($"Created new subscription with id:{createdSub.Id}");
 
@@ -115,14 +117,20 @@ namespace Gab.Functions
 
         [FunctionName("Notifier")]
         public async Task Notifier(
-            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification)
+            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification,
+            [SignalR(HubName = "gab19")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
             try
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
                 var user = notification.Resource.Path.Split('/')[1];
                 var ev = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
-                Console.WriteLine(ev.Subject);
+                await signalRMessages.AddAsync(
+                    new SignalRMessage
+                    {
+                        Target = $"Event{notification.ChangeType.UppercaseFirst()}",
+                        Arguments = new object[] { ev.ToEvent() }
+                    });
             }
             catch (Exception e)
             {
@@ -140,7 +148,7 @@ namespace Gab.Functions
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
 
-                var query = new TableQuery<SubEntity>();
+                var query = new TableQuery<SubscriptionEntity>();
                 var segment = await subTable.ExecuteQuerySegmentedAsync(query, null);
                 var subs = segment.ToList();
 
@@ -170,6 +178,18 @@ namespace Gab.Functions
             }
         }
 
+        [FunctionName("negotiate")]
+        public static SignalRConnectionInfo GetHubInfo(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req,
+            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
+        {
+            return connectionInfo;
+        }
+
+        #endregion
+
+        #region Methods
+
         GraphServiceClient GetGraphClient(string endpoint)
         {
             return new GraphServiceClient(endpoint, new DelegateAuthenticationProvider(
@@ -186,6 +206,8 @@ namespace Gab.Functions
             var result = await authContext.AcquireTokenAsync(configuration.GraphEndpoint, new ClientCredential(configuration.ClientId, configuration.ClientSecret));
             return result.AccessToken;
         }
+
+        #endregion 
     }
 }
  

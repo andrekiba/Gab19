@@ -4,7 +4,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace Gab.Shared.Models
 {
-    public class Sub
+    public class Subscription
     {
         public string Id { get; set; }
         public string Resource { get; set; }
@@ -14,7 +14,7 @@ namespace Gab.Shared.Models
         public DateTimeOffset? ExpirationDateTime { get; set; }
     }
 
-    public class CreateSub
+    public class CreateSubscription
     {
         public string Resource { get; set; }
         public string ChangeType { get; set; }
@@ -23,7 +23,7 @@ namespace Gab.Shared.Models
         public DateTimeOffset? ExpirationDateTime { get; set; }
     }
 
-    public class SubEntity : TableEntity
+    public class SubscriptionEntity : TableEntity
     {
         public string Resource { get; set; }
         public string ChangeType { get; set; }
@@ -32,11 +32,11 @@ namespace Gab.Shared.Models
         public DateTimeOffset? ExpirationDateTime { get; set; }
     }
 
-    public static class Mappings
+    public static class SubscriptionMappings
     {
-        public static SubEntity ToSubEntity(this Subscription sub)
+        public static SubscriptionEntity ToSubscriptionEntity(this Microsoft.Graph.Subscription sub)
         {
-            return new SubEntity
+            return new SubscriptionEntity
             {
                 PartitionKey = "SUBSCRIPTION",
                 RowKey = sub.Id,
@@ -48,9 +48,9 @@ namespace Gab.Shared.Models
             };
         }
 
-        public static SubEntity ToSubEntity(this Sub sub)
+        public static SubscriptionEntity ToSubscriptionEntity(this Subscription sub)
         {
-            return new SubEntity
+            return new SubscriptionEntity
             {
                 PartitionKey = "SUBSCRIPTION",
                 RowKey = sub.Id,
@@ -62,16 +62,16 @@ namespace Gab.Shared.Models
             };
         }
 
-        public static Sub ToSub(this SubEntity sub)
+        public static Subscription ToSubscription(this SubscriptionEntity se)
         {
-            return new Sub
+            return new Subscription
             {
-                Id = sub.RowKey,
-                Resource = sub.Resource,
-                ChangeType = sub.ChangeType,
-                ClientState = sub.ClientState,
-                NotificationUrl = sub.NotificationUrl,
-                ExpirationDateTime = sub.ExpirationDateTime
+                Id = se.RowKey,
+                Resource = se.Resource,
+                ChangeType = se.ChangeType,
+                ClientState = se.ClientState,
+                NotificationUrl = se.NotificationUrl,
+                ExpirationDateTime = se.ExpirationDateTime
             };
         }
 

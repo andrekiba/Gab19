@@ -101,7 +101,8 @@ namespace Gab.Functions
                     BodyPreview = e.BodyPreview,
                     Start = e.Start.DateTime,
                     End = e.End.DateTime,
-                    Organizer = e.Organizer.EmailAddress.Name
+                    Organizer = e.Organizer.EmailAddress.Name,
+                    TimeZone = e.OriginalStartTimeZone,
                 }).ToList();
 
                 return new OkObjectResult(Result.Ok(events));
