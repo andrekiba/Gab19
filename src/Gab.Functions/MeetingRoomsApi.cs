@@ -25,7 +25,7 @@ using Subscription = Microsoft.Graph.Subscription;
 
 namespace Gab.Functions
 {
-    public class GraphApi
+    public class MeetingRoomsApi
     {
         #region Field
 
@@ -34,12 +34,12 @@ namespace Gab.Functions
 
         #endregion 
 
-        public GraphApi(AppSettings configuration)
+        public MeetingRoomsApi(AppSettings configuration)
         {
             this.configuration = configuration;
 
             log = new LoggerConfiguration()
-                .WriteTo.AzureTableStorage(configuration.GetValue("AzureWebJobsStorage"), storageTableName: $"{nameof(GraphApi)}Log")
+                .WriteTo.AzureTableStorage(configuration.GetValue("AzureWebJobsStorage"), storageTableName: $"{nameof(MeetingRoomsApi)}Log")
                 .CreateLogger();
         }
 
@@ -55,6 +55,7 @@ namespace Gab.Functions
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
 
+                //use default user
                 var result = await graphClient.Users["b46397cf-4e6f-4f3d-9134-0d8b70646548"].People.Request()
                     .Filter("personType/subclass eq 'Room'")
                     .GetAsync();
@@ -116,7 +117,7 @@ namespace Gab.Functions
             {
                 var error = $"{e.Message}\n\r{e.StackTrace}";
                 log.Error(error);
-                return new OkObjectResult(Result.Fail<List<MeetingRoom>>(error));
+                return new OkObjectResult(Result.Fail<List<Event>>(error));
             }
         }
 
@@ -328,11 +329,20 @@ namespace Gab.Functions
         }
 
         [FunctionName("GetHubInfo")]
-        public static SignalRConnectionInfo GetHubInfo(
+        public Result<SignalRConnectionInfo> GetHubInfo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
             [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
         {
-            return connectionInfo;
+            try
+            {
+                return Result.Ok(connectionInfo);
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return Result.Fail<SignalRConnectionInfo>(error);
+            }           
         }
 
         #endregion
