@@ -1,5 +1,8 @@
-﻿using Foundation;
+﻿using System;
+using System.Threading.Tasks;
+using Foundation;
 using UIKit;
+using Xamarin.Forms;
 
 namespace Gab.iOS
 {
@@ -18,10 +21,32 @@ namespace Gab.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
-            global::Xamarin.Forms.Forms.Init();
+            #region Error Handling
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+
+            #endregion
+
+            Forms.Init();
+            FormsControls.Touch.Main.Init();
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);
         }
+
+        #region Error Handling
+
+        static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
+        {
+            var ex = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
+        }
+
+        static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            var ex = new Exception("CurrentDomainOnUnhandledException", unhandledExceptionEventArgs.ExceptionObject as Exception);
+        }
+
+        #endregion
     }
 }

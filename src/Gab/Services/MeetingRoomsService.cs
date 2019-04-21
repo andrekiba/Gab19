@@ -108,7 +108,7 @@ namespace Gab.Services
 
             return await Task.FromResult(Result.Ok(meetingRooms));
 
-            return await BreakOrRetry(async () => await api.GetMeetingRooms(Constants.MeetingRoomsApiKey, GetCancellationToken()));
+            return await BreakOrRetry(async () => await api.GetMeetingRooms(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
         }
 
         public async Task<Result<List<Event>>> GetCalendarView(string user, DateTime start, DateTime end, string timeZone)
@@ -141,14 +141,14 @@ namespace Gab.Services
 
 
 
-            return await BreakOrRetry(async () => await api.GetCalendarView(Constants.MeetingRoomsApiKey, user, start.ToString("s"), end.ToString("s"), timeZone, GetCancellationToken()));
+            return await BreakOrRetry(async () => await api.GetCalendarView(Constants.MeetingRoomsFuncKey, user, start.ToString("s"), end.ToString("s"), timeZone, GetCancellationToken()));
         }
 
         public async Task<Result> CreateEvent(CreateEvent createEvent)
         {
             return await Task.FromResult(Result.Ok());
 
-            return await BreakOrRetry(async () => await api.CreateEvent(Constants.MeetingRoomsApiKey, createEvent, GetCancellationToken()));
+            return await BreakOrRetry(async () => await api.CreateEvent(Constants.MeetingRoomsFuncKey, createEvent, GetCancellationToken()));
         }
 
         public async Task<Result<SignalRConnectionInfo>> GetHubInfo()
@@ -161,7 +161,7 @@ namespace Gab.Services
 
             return await Task.FromResult(Result.Ok(connectionInfo));
 
-            return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsApiKey, GetCancellationToken()));
+            return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
         }
 
         Task<T> BreakOrRetry<T>(Func<Task<T>> func)

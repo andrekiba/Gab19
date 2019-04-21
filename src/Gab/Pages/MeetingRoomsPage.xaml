@@ -5,6 +5,8 @@
              xmlns:lv="clr-namespace:Syncfusion.ListView.XForms;assembly=Syncfusion.SfListView.XForms"
              xmlns:ptr="clr-namespace:Syncfusion.SfPullToRefresh.XForms;assembly=Syncfusion.SfPullToRefresh.XForms"
              xmlns:ds="clr-namespace:Syncfusion.DataSource;assembly=Syncfusion.DataSource.Portable"
+             xmlns:behaviors="clr-namespace:Gab.Behaviors;assembly=Gab"
+             xmlns:models="clr-namespace:Gab.Shared.Models;assembly=Gab.Shared"
              x:Class="Gab.Pages.MeetingRoomsPage"
              x:Name="MeetingRoomsPageName"
              Title="{Binding Resources[MeetingRoomsLabel]}">
@@ -33,7 +35,23 @@
                 </lv:SfListView.DataSource>
                 <lv:SfListView.ItemTemplate>
                     <DataTemplate>
-                        <cells:MeetingRoomCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomsPageName}}"/>
+                        <cells:BaseCell x:Name="MeetingRoomCell">
+                            <Grid>
+                                <Grid.Behaviors>
+                                    <behaviors:CollectionColoringBehavior x:TypeArguments="models:MeetingRoom" 
+                                                  ObservableCollection="{Binding ItemsSource, Source={x:Reference MeetingRoomList}}"/>
+                                </Grid.Behaviors>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="60"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Text="{Binding Name}"/>
+
+                            </Grid>
+                        </cells:BaseCell>
+                        <!--<cells:MeetingRoomCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomsPageName}}"/>-->
                     </DataTemplate>
                 </lv:SfListView.ItemTemplate>
             </lv:SfListView>

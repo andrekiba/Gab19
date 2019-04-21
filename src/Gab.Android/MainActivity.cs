@@ -1,10 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Acr.UserDialogs;
 using Android.App;
 using Android.Content.PM;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
 using Plugin.CurrentActivity;
 using Xamarin.Forms;
@@ -16,6 +14,13 @@ namespace Gab.Droid
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            #region Error Handling
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+
+            #endregion
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
@@ -29,5 +34,19 @@ namespace Gab.Droid
             FormsControls.Droid.Main.Init(this);
             LoadApplication(new App());
         }
+
+        #region Error Handling
+
+        static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
+        {
+            var ex = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
+        }
+
+        static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            var ex = new Exception("CurrentDomainOnUnhandledException", unhandledExceptionEventArgs.ExceptionObject as Exception);
+        }
+
+        #endregion
     }
 }

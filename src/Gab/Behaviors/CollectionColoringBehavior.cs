@@ -14,7 +14,6 @@ namespace Gab.Behaviors
 
         public static BindableProperty ObservableCollectionProperty =
             BindableProperty.Create(nameof(ObservableCollection), typeof(IList<T>), typeof(CollectionColoringBehavior<T>), propertyChanged: OnCollectionChanged);
-
         public IList<T> ObservableCollection
         {
             get => (IList<T>)GetValue(ObservableCollectionProperty);
@@ -26,7 +25,6 @@ namespace Gab.Behaviors
         }
 
         public static readonly BindableProperty ColorsProperty = BindableProperty.CreateAttached(nameof(Colors), typeof(List<Color>), typeof(CollectionColoringBehavior<T>), new List<Color>());
-
         public List<Color> Colors
         {
             get => (List<Color>)GetValue(ColorsProperty);
