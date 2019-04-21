@@ -19,6 +19,8 @@
     <PackageReference Include="PropertyChanged.Fody" Version="2.6.1" />
     <PackageReference Include="Refit" Version="4.6.107" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.4.1-beta" />
+    <PackageReference Include="Syncfusion.Xamarin.SfListView" Version="17.1.0.41" />
+    <PackageReference Include="Syncfusion.Xamarin.SfPullToRefresh" Version="17.1.0.41" />
     <PackageReference Include="Syncfusion.Xamarin.SfSchedule" Version="17.1.0.41" />
     <PackageReference Include="Xam.Plugin.Connectivity" Version="3.2.0" />
     <PackageReference Include="Xam.Plugin.Iconize" Version="3.5.0.123" />
@@ -32,7 +34,6 @@
 
   <ItemGroup>
     <Folder Include="Base\Navigation\" />
-    <Folder Include="Views\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +55,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Cells\MeetingRoomCell.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Pages\MeetingRoomsPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\AppResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>AppResources.Designer.cs</LastGenOutput>

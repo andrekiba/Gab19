@@ -91,6 +91,17 @@ namespace Gab.Base
             };
         }
 
+        public static IObservable<string> WhenPropertyChanged<T>(this T obj)
+            where T : INotifyPropertyChanged
+        {
+            var obs = Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                    h => obj.PropertyChanged += h,
+                    h => obj.PropertyChanged -= h)
+                .Select(x => x.EventArgs.PropertyName);
+
+            return obs;
+        }
+
         public static void WhenCollectionChanged<T>(this T obj, Action<T> action)
             where T : INotifyCollectionChanged
         {
@@ -109,6 +120,17 @@ namespace Gab.Base
                 if (predicate((T)sender, e))
                     action((T)sender);
             };
+        }       
+
+        public static IObservable<NotifyCollectionChangedEventArgs> WhenCollectionChanged<T>(this T obj)
+            where T : INotifyCollectionChanged
+        {
+            var obs = Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+                h => obj.CollectionChanged += h,
+                h => obj.CollectionChanged -= h)
+                .Select(x => x.EventArgs);
+
+            return obs;
         }
     }
 

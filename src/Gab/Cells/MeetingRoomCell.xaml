@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cells:BaseCell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cells="clr-namespace:Gab.Cells;assembly=Gab"
+             xmlns:behaviors="clr-namespace:Gab.Behaviors;assembly=Gab"
+             xmlns:models="clr-namespace:Gab.Shared.Models;assembly=Gab.Shared"
+             x:Class="Gab.Cells.MeetingRoomCell">
+    
+    <Grid>
+        <Grid.Behaviors>
+            <behaviors:CollectionColoringBehavior x:TypeArguments="models:MeetingRoom" 
+                                                  ObservableCollection="{Binding ItemsSource, Source={x:Reference MeetingRoomList}}"/>
+        </Grid.Behaviors>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="60"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Text="{Binding Name}"/>
+
+    </Grid>
+
+</cells:BaseCell>

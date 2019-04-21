@@ -144,4 +144,10 @@
   <data name="OfflineMessage" xml:space="preserve">
     <value>It looks like you have gone offline. Please check your internet connection to get the latest data and enable syncing data.</value>
   </data>
+  <data name="MeetingRoomsLabel" xml:space="preserve">
+    <value>Meeting Rooms</value>
+  </data>
+  <data name="LoadingMessage" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
 </root>
