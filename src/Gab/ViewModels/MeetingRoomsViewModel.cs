@@ -25,11 +25,9 @@ namespace Gab.ViewModels
 
         #region Properties
 
-        public ObservableRangeCollection<MeetingRoom> MeetingRooms { get; } = new ObservableRangeCollection<MeetingRoom>();
+        public ObservableRangeCollection<MeetingRoom> MeetingRooms { get; set; } = new ObservableRangeCollection<MeetingRoom>();
 
         public bool IsRefreshing { get; set; }
-
-        public MeetingRoom SelectedMeetingRoom { get; set; }
 
         #endregion
 
@@ -95,7 +93,7 @@ namespace Gab.ViewModels
                 {
                     return await mrService.GetMeetingRooms()
                         .OnFailure(error => MeetingRooms.Clear())
-                        //.OnSuccess(mrs => mrs.ForEach(x => MeetingRooms.Add(x)));
+                        //.OnSuccess(mrs => MeetingRooms = new ObservableRangeCollection<MeetingRoom>(mrs));
                         .OnSuccess(mrs => MeetingRooms.ReplaceRange(mrs));
                     
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");

@@ -133,15 +133,35 @@ namespace Gab.Services
                     Id = Guid.Empty.ToString(),
                     Subject = "Test Meeting 1",
                     BodyPreview = "Ciao ciao!",
-                    Start = DateTime.Parse("2019-04-23T15:00:00"),
-                    End = DateTime.Parse("2019-04-23T16:30:00"),
+                    Start = DateTime.Parse("2019-04-23T13:00:00"),
+                    End = DateTime.Parse("2019-04-23T14:30:00"),
                     Organizer = "Andrea Ceroni",
                     TimeZone = "W. Europe Standard Time"
                 },
                 new Event
                 {
                     Id = Guid.Empty.ToString(),
-                    Subject = "Test Meeting 2",
+                    Subject = "Test Meeting 2 con un titolo davvero molto lungo che non ci sta in una riga sola e nemmeno in due, ma neanche in tre righe penso",
+                    BodyPreview = "No preview",
+                    Start = DateTime.Parse("2019-04-23T18:00:00"),
+                    End = DateTime.Parse("2019-04-23T22:43:00"),
+                    Organizer = "Andrea Ceroni",
+                    TimeZone = "W. Europe Standard Time"
+                },
+                new Event
+                {
+                    Id = Guid.Empty.ToString(),
+                    Subject = "Test Meeting 3",
+                    BodyPreview = "No preview",
+                    Start = DateTime.Parse("2019-04-23T23:00:00"),
+                    End = DateTime.Parse("2019-04-23T23:30:00"),
+                    Organizer = "Andrea Ceroni",
+                    TimeZone = "W. Europe Standard Time"
+                },
+                new Event
+                {
+                    Id = Guid.Empty.ToString(),
+                    Subject = "Test Meeting 4",
                     BodyPreview = "Ciao ciao 2!",
                     Start = DateTime.Parse("2019-04-24T15:00:00"),
                     End = DateTime.Parse("2019-04-24T16:00:00"),
@@ -151,8 +171,6 @@ namespace Gab.Services
             };
 
             return await Task.FromResult(Result.Ok(events));
-
-
 
             return await BreakOrRetry(async () => await api.GetCalendarView(Constants.MeetingRoomsFuncKey, user, start.ToString("s"), end.ToString("s"), timeZone, GetCancellationToken()));
         }

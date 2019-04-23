@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using Gab.Base;
+using Gab.Pages;
 using Gab.Resources;
 using Gab.Services;
 using Gab.Shared.Base;
@@ -15,6 +14,7 @@ using MvvmHelpers;
 using Plugin.Connectivity;
 using PropertyChanged;
 using Xamarin.Forms;
+using ScrollToPosition = Syncfusion.ListView.XForms.ScrollToPosition;
 
 namespace Gab.ViewModels
 {
@@ -23,10 +23,9 @@ namespace Gab.ViewModels
         #region Fields
 
         readonly IMeetingRoomsService mrService;
-        Timer refreshTimer;
-        bool refreshNeeded = true;
-        IDisposable timeTimerSub;
+        //IDisposable timeTimerSub;
         IDisposable eventChangedSub;
+        IDisposable eventsChangedSub;
         const string CurrentTimeZone = "W. Europe Standard Time";
 
         #endregion
@@ -39,21 +38,7 @@ namespace Gab.ViewModels
 
         public DateTime Now { get; set; } = DateTime.Now;
 
-        [DependsOn(nameof(Events), nameof(Now))]
-        //public Event CurrentEvent => Events.SingleOrDefault(e => e.Start <= DateTime.Now && e.End >= DateTime.Now);
-        public Event CurrentEvent
-        {
-            get
-            {
-                var currentEvent = Events.SingleOrDefault(e => e.Start <= DateTime.Now && e.End >= DateTime.Now);
-                if (currentEvent != null)
-                {
-                    currentEvent.IsCurrent = true;
-                }
-                    
-                return currentEvent;
-            }
-        }
+        public Event CurrentEvent { get; set; }
 
         [DependsOn(nameof(CurrentEvent))]
         public bool Booked => CurrentEvent != null;
@@ -107,38 +92,41 @@ namespace Gab.ViewModels
                 return;
 
             MeetingRoom = meetingRoom;
-
-            refreshTimer = new Timer(TimeSpan.FromMinutes(10).TotalMilliseconds) { Enabled = true };
-            refreshTimer.Elapsed += (sender, e) =>
-            {
-                refreshTimer.Stop();
-                refreshNeeded = true;
-            };
         }
 
         protected override async void ViewIsAppearing(object sender, EventArgs e)
         {
             base.ViewIsAppearing(sender, e);
-            if (!refreshNeeded)
-                return;
 
-            refreshNeeded = false;
-            refreshTimer.Start();
-            RefreshCommand.Execute(null);
-
-            timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x => Now = DateTime.Now);
-            Events.CollectionChanged += EventsCollectionChanged();
+            Device.StartTimer(TimeSpan.FromMinutes(1), () =>
+            {
+                Now = DateTime.Now;
+                SetCurrentEvent();
+                return true;
+            });
+            //timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x =>
+            //{
+            //    Now = DateTime.Now;
+            //    SetCurrentEvent();
+            //});
+            eventsChangedSub = Events.WhenCollectionChanged().Subscribe(x =>
+            {
+                SetCurrentEvent();
+            });
 
             await mrService.ConfigureHub();
             await mrService.ConnectHub();
             SubscribeToHub();
+
+            RefreshCommand.Execute(null);
         }
 
         protected override async void ViewIsDisappearing(object sender, EventArgs e)
         {
             base.ViewIsDisappearing(sender, e);
-            Events.CollectionChanged -= EventsCollectionChanged();
-            timeTimerSub.Dispose();
+            
+            //timeTimerSub.Dispose();
+            eventsChangedSub.Dispose();
 
             await mrService.DisconnectHub();
             eventChangedSub.Dispose();
@@ -168,7 +156,28 @@ namespace Gab.ViewModels
 
         #region Methods
 
-        NotifyCollectionChangedEventHandler EventsCollectionChanged() => (sender, args) => RaisePropertyChanged(nameof(CurrentEvent));
+        void SetCurrentEvent()
+        {
+            var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
+
+            if(CurrentEvent == newCurrentEvent)
+                return;
+
+            if (CurrentEvent != null)
+                CurrentEvent.IsCurrent = false;
+
+            CurrentEvent = newCurrentEvent;
+            if (CurrentEvent != null)
+            {
+                CurrentEvent.IsCurrent = true;
+                //Events.RemoveRange(Events.Where(e => e.End.AddSeconds(-1) < CurrentEvent.Start));
+                Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    //((MeetingRoomPage)CurrentPage).EventListView.ScrollTo(CurrentEvent, ScrollToPosition.Start, true);
+                    ((MeetingRoomPage)CurrentPage).EventListView.LayoutManager.ScrollToRowIndex(Events.IndexOf(CurrentEvent), ScrollToPosition.Start, true);
+                });
+            }            
+        }
         async Task ExecuteRefreshCommand()
         {
             if (!CrossConnectivity.Current.IsConnected)
@@ -183,15 +192,15 @@ namespace Gab.ViewModels
                 {
                     return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1), CurrentTimeZone)
                         .OnFailure(error => Events.Clear())
-                        //.OnSuccess(events => Events.ReplaceRange(events));
-                        .OnSuccess(events => Events = new ObservableRangeCollection<Event>(events));
+                        .OnSuccess(events => Events.ReplaceRange(events));
+                        //.OnSuccess(events => Events = new ObservableRangeCollection<Event>(events));
 
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
 
                 IsRefreshing = false;
 
                 if (result.IsFailure)
-                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
+                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);               
             }
         }
         async Task ExecuteCreateEventCommand()

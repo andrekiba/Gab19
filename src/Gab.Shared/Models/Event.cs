@@ -1,10 +1,11 @@
 ﻿using System;
-using MvvmHelpers;
 using Newtonsoft.Json;
+using PropertyChanged;
 
 namespace Gab.Shared.Models
 {
-    public class Event : ObservableObject
+    [AddINotifyPropertyChangedInterface]
+    public class Event
     {
         public string Id { get; set; }
         public string Subject { get; set; }
@@ -17,6 +18,8 @@ namespace Gab.Shared.Models
         [JsonIgnore]
         public bool IsCurrent { get; set; }
 
+        #region Equals
+
         public override bool Equals(object obj) => Equals(obj as Event);
 
         public bool Equals(Event other)
@@ -24,10 +27,32 @@ namespace Gab.Shared.Models
             return other != null && other.Id == Id;
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode() => Id.GetHashCode();
+
+        #endregion
+
+        #region Operators
+
+        public static bool operator ==(Event ev1, Event ev2)
         {
-            return Id.GetHashCode();
+            if (ReferenceEquals(ev1, ev2))
+                return true;
+
+            if (ReferenceEquals(ev1, null))
+                return false;
+            
+            if (ReferenceEquals(ev2, null))
+                return false;
+
+            return ev1.Equals(ev2);
         }
+
+        // this is second one '!='
+        public static bool operator !=(Event ev1, Event ev2) => !(ev1 == ev2);
+
+        #endregion 
+
+        //public void RaisePropertyChanged([CallerMemberName] string propertyName = null) => OnPropertyChanged(propertyName);
     }
 
     public class CreateEvent

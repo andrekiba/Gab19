@@ -6,6 +6,7 @@ using Gab.Shared.Models;
 using Gab.ViewModels;
 using Plugin.Multilingual;
 using Syncfusion.DataSource;
+using Syncfusion.ListView.XForms;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,9 +15,12 @@ namespace Gab.Pages
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MeetingRoomPage : ContentPage, IAnimationPage
     {
+        public SfListView EventListView;
         public MeetingRoomPage()
         {
             InitializeComponent();
+
+            EventListView = EventList;
 
             EventList.ItemTapped += (sender, e) =>
             {

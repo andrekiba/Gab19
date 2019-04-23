@@ -27,9 +27,9 @@
         </Grid.ColumnDefinitions>
 
         <StackLayout Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalOptions="StartAndExpand" Spacing="10">
-            <Label Text="{Binding Start, StringFormat='{}{0:HH\\:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
+            <Label Text="{Binding Start, StringFormat='{}{0:HH:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
             <iconize:IconLabel Text="fas-arrow-right" FontSize="15" VerticalOptions="Center" VerticalTextAlignment="Center" />
-            <Label Text="{Binding End, StringFormat='{}{0:HH\\:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
+            <Label Text="{Binding End, StringFormat='{}{0:HH:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
         </StackLayout>
         <Label Grid.Row="1" Grid.Column="0" Text="{Binding Subject}" FontAttributes="Bold" FontSize="Large"
                TextColor="{Binding IsCurrent, Converter={StaticResource BookedToColorConverter}}"

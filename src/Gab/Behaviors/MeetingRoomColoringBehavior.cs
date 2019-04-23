@@ -66,7 +66,7 @@ namespace Gab.Behaviors
         async void CalculateColor()
         {
             //yield control to avoid a race condition
-            await Task.Delay(1);
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
             View sameView = null;
             if (ObservableCollection == null || view?.TryGetTarget(out sameView) != true || !(sameView.BindingContext is MeetingRoom item))
                 return;

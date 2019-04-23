@@ -39,7 +39,7 @@
             </Grid.RowDefinitions>
 
             <StackLayout Grid.Row="0" Spacing="5">
-                <Label Text="{Binding Now, StringFormat='{}{0:HH\\:mm dddd, MMMM dd}'}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Start"/>
+                <Label Text="{Binding Now, StringFormat='{}{0:HH:mm dddd, dd MMMM}'}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Start"/>
                 <Label Text="{Binding Resources[FreeLabel]}" TextColor="White" FontSize="Large" FontAttributes="Bold" 
                        HorizontalOptions="Center" VerticalOptions="Center"/>
             </StackLayout>
@@ -90,7 +90,8 @@
                 </pb:SfCircularProgressBar>
             </Grid>
             
-            <Label Grid.Row="2" Text="{Binding CurrentEvent.Subject}" HorizontalOptions="Center" VerticalOptions="End"
+            <Label Grid.Row="2" Text="{Binding CurrentEvent.Subject}" LineBreakMode="TailTruncation"
+                   HorizontalOptions="Center" VerticalOptions="End"
                    TextColor="White"/>
         </Grid>
 
@@ -103,14 +104,17 @@
                            VerticalOptions="Fill"
                            HorizontalOptions="Fill"
                            ItemsSource="{Binding Events}"                          
-                           SelectionMode="None"                            
+                           SelectionMode="None"
+                           IsStickyGroupHeader="True"
+                           AllowGroupExpandCollapse="True"
+                           AutoFitMode="Height"                          
                            ItemSize="100"
                            ItemSpacing="0"
                            Padding="0">
                     <lv:SfListView.DataSource>
                         <ds:DataSource>
                             <ds:DataSource.SortDescriptors>
-                                <ds:SortDescriptor PropertyName="Start" Direction="Descending"/>
+                                <ds:SortDescriptor PropertyName="Start" Direction="Ascending"/>
                             </ds:DataSource.SortDescriptors>
                         </ds:DataSource>
                     </lv:SfListView.DataSource>
