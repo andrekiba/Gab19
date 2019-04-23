@@ -4,6 +4,7 @@ using Gab.Base.Grouping;
 using Gab.Resources;
 using Gab.Shared.Models;
 using Gab.ViewModels;
+using Plugin.Multilingual;
 using Syncfusion.DataSource;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -39,12 +40,12 @@ namespace Gab.Pages
                     }
                     else if (date == DateTime.Today.AddDays(1))
                     {
-                        key.Name = $"{AppResources.TomorrowLabel}  {ev.Start:D}";
+                        key.Name = $"{AppResources.TomorrowLabel}  {ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo)}";
                         key.Value = 1;
                     }
                     else
                     {
-                        key.Name = ev.Start.ToString("D");
+                        key.Name = ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo);
                         key.Value = 2;
                     }
                     key.DateTime = date;                   

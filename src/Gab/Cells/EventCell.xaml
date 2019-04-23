@@ -32,13 +32,13 @@
             <Label Text="{Binding End, StringFormat='{}{0:HH\\:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
         </StackLayout>
         <Label Grid.Row="1" Grid.Column="0" Text="{Binding Subject}" FontAttributes="Bold" FontSize="Large"
-               TextColor="{Binding IsCurrent, Converter={StaticResource BookedToColorConverter}, Source={x:Reference EventCellName}}"
+               TextColor="{Binding IsCurrent, Converter={StaticResource BookedToColorConverter}}"
                VerticalOptions="Center" VerticalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="0" Text="{Binding Organizer}"
                VerticalOptions="Center" VerticalTextAlignment="Center"/>
 
         <iconize:IconLabel Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Text="fas-times-circle" FontSize="30"
-                           IsVisible="{Binding IsCurrent, Source={x:Reference EventCellName}}"
+                           IsVisible="{Binding IsCurrent}"
                            TextColor="{Binding Path=ParentBindingContext.BookedColor, Source={x:Reference EventCellName}}"
                            HorizontalOptions="Center" VerticalTextAlignment="Center">
             <iconize:IconLabel.GestureRecognizers>

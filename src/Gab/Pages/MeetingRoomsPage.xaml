@@ -10,7 +10,7 @@
              Title="{Binding Resources[MeetingRoomsLabel]}">
 
     <ptr:SfPullToRefresh x:Name="PullToRefresh"
-                         ProgressBackgroundColor="{StaticResource LightGreen}" ProgressStrokeColor="White"
+                         ProgressBackgroundColor="{StaticResource Teal}" ProgressStrokeColor="White"
                          RefreshContentHeight="50" RefreshContentWidth="50" TransitionMode="SlideOnTop"
                          IsRefreshing="{Binding IsRefreshing}" Refreshing="PullToRefresh_OnRefreshing">
         <ptr:SfPullToRefresh.PullableContent>
