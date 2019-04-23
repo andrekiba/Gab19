@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Foundation;
+using ImageCircle.Forms.Plugin.iOS;
+using Syncfusion.ListView.XForms.iOS;
+using Syncfusion.SfPullToRefresh.XForms.iOS;
 using UIKit;
 using Xamarin.Forms;
 
@@ -29,7 +32,10 @@ namespace Gab.iOS
             #endregion
 
             Forms.Init();
+            ImageCircleRenderer.Init();
             FormsControls.Touch.Main.Init();
+            SfPullToRefreshRenderer.Init();
+            SfListViewRenderer.Init();
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);

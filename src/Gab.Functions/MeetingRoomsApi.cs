@@ -100,16 +100,7 @@ namespace Gab.Functions
 
                 var result = await graphClient.Users[user].CalendarView.Request(options).GetAsync();
 
-                var events = result.Select(e => new Event
-                {
-                    Id = e.Id,
-                    Subject = e.Subject,
-                    BodyPreview = e.BodyPreview,
-                    Start = e.Start.DateTime,
-                    End = e.End.DateTime,
-                    Organizer = e.Organizer.EmailAddress.Name,
-                    TimeZone = e.OriginalStartTimeZone,
-                }).ToList();
+                var events = result.Select(e => e.ToEvent()).ToList();
 
                 return new OkObjectResult(Result.Ok(events));
             }

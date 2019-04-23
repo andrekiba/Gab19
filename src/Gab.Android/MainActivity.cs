@@ -4,6 +4,7 @@ using Acr.UserDialogs;
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using ImageCircle.Forms.Plugin.Droid;
 using Plugin.CurrentActivity;
 using Xamarin.Forms;
 
@@ -30,6 +31,8 @@ namespace Gab.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             UserDialogs.Init(this);
             Forms.Init(this, savedInstanceState);
+            Plugin.Iconize.Iconize.Init(Resource.Id.toolbar, Resource.Id.sliding_tabs);
+            ImageCircleRenderer.Init();
             Plugin.Iconize.Iconize.Init(Resource.Id.toolbar, Resource.Id.sliding_tabs);
             FormsControls.Droid.Main.Init(this);
             LoadApplication(new App());

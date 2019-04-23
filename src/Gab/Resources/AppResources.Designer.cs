@@ -19,7 +19,7 @@ namespace Gab.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class AppResources {
@@ -61,6 +61,24 @@ namespace Gab.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BOOKED.
+        /// </summary>
+        public static string BookedLabel {
+            get {
+                return ResourceManager.GetString("BookedLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Book now.
+        /// </summary>
+        public static string BookLabel {
+            get {
+                return ResourceManager.GetString("BookLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -84,6 +102,15 @@ namespace Gab.Resources {
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FREE.
+        /// </summary>
+        public static string FreeLabel {
+            get {
+                return ResourceManager.GetString("FreeLabel", resourceCulture);
             }
         }
         
@@ -138,6 +165,24 @@ namespace Gab.Resources {
         public static string OperationTimeout {
             get {
                 return ResourceManager.GetString("OperationTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TODAY.
+        /// </summary>
+        public static string TodayLabel {
+            get {
+                return ResourceManager.GetString("TodayLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TOMORROW.
+        /// </summary>
+        public static string TomorrowLabel {
+            get {
+                return ResourceManager.GetString("TomorrowLabel", resourceCulture);
             }
         }
         

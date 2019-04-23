@@ -120,8 +120,8 @@ namespace Gab.Services
                     Id = Guid.Empty.ToString(),
                     Subject = "Test Meeting 1",
                     BodyPreview = "Ciao ciao!",
-                    Start = "2019-04-22T18:00:00",
-                    End = "2019-04-22T19:00:00",
+                    Start = DateTime.Parse("2019-04-23T02:00:00"),
+                    End = DateTime.Parse("2019-04-23T03:00:00"),
                     Organizer = "Andrea Ceroni",
                     TimeZone = "W. Europe Standard Time"
                 },
@@ -130,8 +130,8 @@ namespace Gab.Services
                     Id = Guid.Empty.ToString(),
                     Subject = "Test Meeting 2",
                     BodyPreview = "Ciao ciao 2!",
-                    Start = "2019-04-23T18:00:00",
-                    End = "2019-04-23T19:00:00",
+                    Start = DateTime.Parse("2019-04-24T15:00:00"),
+                    End = DateTime.Parse("2019-04-24T16:00:00"),
                     Organizer = "Andrea Ceroni",
                     TimeZone = "W. Europe Standard Time"
                 },

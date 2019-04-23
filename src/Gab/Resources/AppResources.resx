@@ -150,4 +150,19 @@
   <data name="LoadingMessage" xml:space="preserve">
     <value>Loading...</value>
   </data>
+  <data name="TodayLabel" xml:space="preserve">
+    <value>TODAY</value>
+  </data>
+  <data name="TomorrowLabel" xml:space="preserve">
+    <value>TOMORROW</value>
+  </data>
+  <data name="FreeLabel" xml:space="preserve">
+    <value>FREE</value>
+  </data>
+  <data name="BookedLabel" xml:space="preserve">
+    <value>BOOKED</value>
+  </data>
+  <data name="BookLabel" xml:space="preserve">
+    <value>Book now</value>
+  </data>
 </root>

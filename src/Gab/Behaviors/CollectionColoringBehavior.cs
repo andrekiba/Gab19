@@ -31,18 +31,18 @@ namespace Gab.Behaviors
             set => SetValue(ColorsProperty, value);
         }
 
-        public static BindableProperty MeetingRoomIndexProperty = BindableProperty.Create(nameof(MeetingRoomIndex), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
-        public int MeetingRoomIndex
+        public static BindableProperty IndexProperty = BindableProperty.Create(nameof(Index), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
+        public int Index
         {
-            get => (int)GetValue(MeetingRoomIndexProperty);
-            set => SetValue(MeetingRoomIndexProperty, value);
+            get => (int)GetValue(IndexProperty);
+            set => SetValue(IndexProperty, value);
         }
 
-        public static BindableProperty MeetingRoomCountProperty = BindableProperty.Create(nameof(MeetingRoomCount), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
-        public int MeetingRoomCount
+        public static BindableProperty CountProperty = BindableProperty.Create(nameof(Count), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
+        public int Count
         {
-            get => (int)GetValue(MeetingRoomCountProperty);
-            set => SetValue(MeetingRoomCountProperty, value);
+            get => (int)GetValue(CountProperty);
+            set => SetValue(CountProperty, value);
         }
 
         static void OnCollectionChanged(BindableObject bindable, object oldValue, object newValue)
@@ -81,15 +81,18 @@ namespace Gab.Behaviors
             {
                 var index = ObservableCollection.IndexOf(item);
                 var count = ObservableCollection.Count;
-                //var colors = Constants.Colors.MeetingRoomColors;
+                var colors = Constants.Colors.MeetingRoomColors;
 
-                var backgroundColor = Colors[(count - index - 1) % Colors.Count];
+                var color = colors[(count - index - 1) % colors.Count];
+
+                var backgroundColor = color;
 
                 sameView.BackgroundColor = backgroundColor;
             }
-            catch
+            catch(Exception ex)
             {
                 // Let's not crash because of a coloring fail :)
+                Console.WriteLine(ex.Message);
             }
         }
     }

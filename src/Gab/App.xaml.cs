@@ -27,7 +27,7 @@ namespace Gab
             SetupIoc();
 
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Constants.SyncfusionLicenseKey);
-            Iconize.With(new FontAwesomeRegularModule()).With(new FontAwesomeSolidModule());
+            Iconize.With(new FontAwesomeRegularModule()).With(new FontAwesomeSolidModule()).With(new FontAwesomeBrandsModule());
 
             SetStartPage();
         }

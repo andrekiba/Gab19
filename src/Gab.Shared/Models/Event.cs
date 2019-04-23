@@ -1,12 +1,14 @@
-﻿namespace Gab.Shared.Models
+﻿using System;
+
+namespace Gab.Shared.Models
 {
     public class Event
     {
         public string Id { get; set; }
         public string Subject { get; set; }
         public string BodyPreview { get; set; }
-        public string Start { get; set; }
-        public string End { get; set; }
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
         public string Organizer { get; set; }
         public string TimeZone { get; set; }
     }
@@ -26,8 +28,8 @@
                 Id = e.Id,
                 Subject = e.Subject,
                 BodyPreview = e.BodyPreview,
-                Start = e.Start.DateTime,
-                End = e.End.DateTime,
+                Start = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.Start.DateTime), e.OriginalStartTimeZone),
+                End = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.End.DateTime), e.OriginalStartTimeZone),
                 Organizer = e.Organizer.EmailAddress.Name,
                 TimeZone = e.OriginalStartTimeZone           
             };
