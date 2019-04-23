@@ -97,107 +97,107 @@ namespace Gab.Services
 
         public async Task<Result<List<MeetingRoom>>> GetMeetingRooms()
         {
-            var meetingRooms = new List<MeetingRoom>
-            {
-                new MeetingRoom
-                {
-                    Id = "0e17c9c5-9a12-47fd-b7dc-44f53a986dd6",
-                    Mail = "daitarn@hyrule.onmicrosoft.com",
-                    Name = "Daitarn"
-                },
-                new MeetingRoom
-                {
-                    Id = "9bc83951-f968-4ab7-b07d-effb484205ad",
-                    Mail = "voltron@hyrule.onmicrosoft.com",
-                    Name = "Voltron"
-                },
-                new MeetingRoom
-                {
-                    Id = "b8817ade-6fae-410f-8dec-7932abbb8029",
-                    Mail = "mazinga@hyrule.onmicrosoft.com",
-                    Name = "Mazinga"
-                }
-            };
+            //var meetingRooms = new List<MeetingRoom>
+            //{
+            //    new MeetingRoom
+            //    {
+            //        Id = "0e17c9c5-9a12-47fd-b7dc-44f53a986dd6",
+            //        Mail = "daitarn@hyrule.onmicrosoft.com",
+            //        Name = "Daitarn"
+            //    },
+            //    new MeetingRoom
+            //    {
+            //        Id = "9bc83951-f968-4ab7-b07d-effb484205ad",
+            //        Mail = "voltron@hyrule.onmicrosoft.com",
+            //        Name = "Voltron"
+            //    },
+            //    new MeetingRoom
+            //    {
+            //        Id = "b8817ade-6fae-410f-8dec-7932abbb8029",
+            //        Mail = "mazinga@hyrule.onmicrosoft.com",
+            //        Name = "Mazinga"
+            //    }
+            //};
 
-            return await Task.FromResult(Result.Ok(meetingRooms));
+            //return await Task.FromResult(Result.Ok(meetingRooms));
 
             return await BreakOrRetry(async () => await api.GetMeetingRooms(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
         }
 
         public async Task<Result<List<Event>>> GetCalendarView(string user, DateTime start, DateTime end, string timeZone)
         {
-            var events = new List<Event>
-            {
-                new Event
-                {
-                    Id = Guid.Empty.ToString(),
-                    Subject = "Test Meeting 1",
-                    BodyPreview = "Ciao ciao!",
-                    Start = DateTime.Parse("2019-04-23T13:00:00"),
-                    End = DateTime.Parse("2019-04-23T14:30:00"),
-                    Organizer = "Andrea Ceroni",
-                    TimeZone = "W. Europe Standard Time"
-                },
-                new Event
-                {
-                    Id = Guid.Empty.ToString(),
-                    Subject = "Test Meeting 2 con un titolo davvero molto lungo che non ci sta in una riga sola e nemmeno in due, ma neanche in tre righe penso",
-                    BodyPreview = "No preview",
-                    Start = DateTime.Parse("2019-04-23T18:00:00"),
-                    End = DateTime.Parse("2019-04-23T22:43:00"),
-                    Organizer = "Andrea Ceroni",
-                    TimeZone = "W. Europe Standard Time"
-                },
-                new Event
-                {
-                    Id = Guid.Empty.ToString(),
-                    Subject = "Test Meeting 3",
-                    BodyPreview = "No preview",
-                    Start = DateTime.Parse("2019-04-23T23:00:00"),
-                    End = DateTime.Parse("2019-04-23T23:30:00"),
-                    Organizer = "Andrea Ceroni",
-                    TimeZone = "W. Europe Standard Time"
-                },
-                new Event
-                {
-                    Id = Guid.Empty.ToString(),
-                    Subject = "Test Meeting 4",
-                    BodyPreview = "Ciao ciao 2!",
-                    Start = DateTime.Parse("2019-04-24T15:00:00"),
-                    End = DateTime.Parse("2019-04-24T16:00:00"),
-                    Organizer = "Andrea Ceroni",
-                    TimeZone = "W. Europe Standard Time"
-                },
-            };
+            //var events = new List<Event>
+            //{
+            //    new Event
+            //    {
+            //        Id = Guid.Empty.ToString(),
+            //        Subject = "Test Meeting 1",
+            //        BodyPreview = "Ciao ciao!",
+            //        Start = DateTime.Parse("2019-04-23T13:00:00"),
+            //        End = DateTime.Parse("2019-04-23T14:30:00"),
+            //        Organizer = "Andrea Ceroni",
+            //        TimeZone = "W. Europe Standard Time"
+            //    },
+            //    new Event
+            //    {
+            //        Id = Guid.Empty.ToString(),
+            //        Subject = "Test Meeting 2 con un titolo davvero molto lungo che non ci sta in una riga sola e nemmeno in due, ma neanche in tre righe penso",
+            //        BodyPreview = "No preview",
+            //        Start = DateTime.Parse("2019-04-23T18:00:00"),
+            //        End = DateTime.Parse("2019-04-23T22:43:00"),
+            //        Organizer = "Andrea Ceroni",
+            //        TimeZone = "W. Europe Standard Time"
+            //    },
+            //    new Event
+            //    {
+            //        Id = Guid.Empty.ToString(),
+            //        Subject = "Test Meeting 3",
+            //        BodyPreview = "No preview",
+            //        Start = DateTime.Parse("2019-04-23T23:00:00"),
+            //        End = DateTime.Parse("2019-04-23T23:30:00"),
+            //        Organizer = "Andrea Ceroni",
+            //        TimeZone = "W. Europe Standard Time"
+            //    },
+            //    new Event
+            //    {
+            //        Id = Guid.Empty.ToString(),
+            //        Subject = "Test Meeting 4",
+            //        BodyPreview = "Ciao ciao 2!",
+            //        Start = DateTime.Parse("2019-04-24T15:00:00"),
+            //        End = DateTime.Parse("2019-04-24T16:00:00"),
+            //        Organizer = "Andrea Ceroni",
+            //        TimeZone = "W. Europe Standard Time"
+            //    },
+            //};
 
-            return await Task.FromResult(Result.Ok(events));
+            //return await Task.FromResult(Result.Ok(events));
 
             return await BreakOrRetry(async () => await api.GetCalendarView(Constants.MeetingRoomsFuncKey, user, start.ToString("s"), end.ToString("s"), timeZone, GetCancellationToken()));
         }
 
         public async Task<Result> CreateEvent(CreateEvent createEvent)
         {
-            return await Task.FromResult(Result.Ok());
+            //return await Task.FromResult(Result.Ok());
 
             return await BreakOrRetry(async () => await api.CreateEvent(Constants.MeetingRoomsFuncKey, createEvent, GetCancellationToken()));
         }
 
         public async Task<Result> EndsEvent(EndsEvent endsEvent)
         {
-            return await Task.FromResult(Result.Ok());
+            //return await Task.FromResult(Result.Ok());
 
             return await BreakOrRetry(async () => await api.EndsEvent(Constants.MeetingRoomsFuncKey, endsEvent, GetCancellationToken()));
         }
 
         async Task<Result<SignalRConnectionInfo>> GetHubInfo()
         {
-            var connectionInfo = new SignalRConnectionInfo
-            {
-                Url = "",
-                AccessToken = ""
-            };
+            //var connectionInfo = new SignalRConnectionInfo
+            //{
+            //    Url = "",
+            //    AccessToken = ""
+            //};
 
-            return await Task.FromResult(Result.Ok(connectionInfo));
+            //return await Task.FromResult(Result.Ok(connectionInfo));
 
             return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
         }

@@ -8,13 +8,13 @@ namespace Gab.Base
     {
 
         //azure
-        //public const string MeetingRoomsApi = "http://localhost:5000/api";
-        //public const string MeetingRoomsApi = "http://10.211.55.3:5000/api";
+        //public const string MeetingRoomsApi = "http://localhost:7071/api";
         public const string MeetingRoomsApi = "https://gab19.azurewebsites.net/api";
         public const string MeetingRoomsFuncKey = "VC4ave2hq0N1O0vxEGqkfDLiawNS0Q5IZ6jakWLqSTQ4yIg2gWsn2A==";
 
         //syncfusion
         public const string SyncfusionLicenseKey = "OTI4NzJAMzEzNzJlMzEyZTMwVDhlOGR5YllxWTVTM0Jpa09mUGtyNStnQWVDQXpqS29wVWV6bW1BRzNrbz0=";
+        //public const string SyncfusionLicenseKey = "";
 
         public static class Colors
         {
