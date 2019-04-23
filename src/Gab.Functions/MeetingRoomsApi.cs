@@ -47,7 +47,7 @@ namespace Gab.Functions
 
         [FunctionName("MeetingRooms")]
         public async Task<IActionResult> MeetingRooms(
-            [HttpTrigger(AuthorizationLevel.Admin, "get", Route = "meetingRooms")] HttpRequest req
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "meetingRooms")] HttpRequest req
             //[Token(Identity = TokenIdentityMode.ClientCredentials, IdentityProvider = "AAD", Resource = "https://graph.microsoft.com")]string token
             )
         {
@@ -82,7 +82,7 @@ namespace Gab.Functions
 
         [FunctionName("CalendarView")]
         public async Task<IActionResult> CalendarView(
-            [HttpTrigger(AuthorizationLevel.Admin, "get", Route = "calendarView")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "calendarView")] HttpRequest req)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace Gab.Functions
 
         [FunctionName("CreateEvent")]
         public async Task<IActionResult> CreateEvent(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "event")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "event")] HttpRequest req)
         {
             try
             {
@@ -174,7 +174,7 @@ namespace Gab.Functions
 
         [FunctionName("EndsEvent")]
         public async Task<IActionResult> EndsEvent(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "event/ends")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "event/ends")] HttpRequest req)
         {
             try
             {
@@ -354,7 +354,7 @@ namespace Gab.Functions
 
         [FunctionName("HubInfo")]
         public Result<SignalRConnectionInfo> HubInfo(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "negotiate")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
             [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
         {
             try
