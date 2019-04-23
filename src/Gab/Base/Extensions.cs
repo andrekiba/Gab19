@@ -48,7 +48,51 @@ namespace Gab.Base
             return start * normalized + end * (1 - normalized);
         }
 
-        public static string ToHexString(this Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        public static string ToHex(this Color color)
+        {
+            var red = (int)(color.R * 255);
+            var green = (int)(color.G * 255);
+            var blue = (int)(color.B * 255);
+            var alpha = (int)(color.A * 255);
+            return $"#{alpha:X2}{red:X2}{green:X2}{blue:X2}";
+        }
+
+        public static Color Lighter(this Color color)
+        {
+            return color.WithLuminosity(color.Luminosity + 0.2);
+        }
+
+        public static Color Darker(this Color color)
+        {
+            return color.WithLuminosity(color.Luminosity - 0.2);
+        }
+
+        public static Color Lighten(this Color color, double amount)
+        {
+            return color.WithLuminosity(color.Luminosity + amount);
+        }
+
+        public static Color Darken(this Color color, double amaount)
+        {
+            return color.WithLuminosity(color.Luminosity - amaount);
+        }
+
+        public static Color Complement(this Color color)
+        {
+            var hue = (color.Hue * 359.0);
+            var newHue = ((hue + 180) % 359.0);
+            var complement = color.WithHue(newHue / 359.0);
+
+            return complement;
+        }
+
+        public static Color Invert(this Color color)
+        {
+            var r = 255 - (int)(255 * color.R);
+            var g = 255 - (int)(255 * color.G);
+            var b = 255 - (int)(255 * color.B);
+            return Color.FromRgb(r, g, b);
+        }
     }
 
     [ContentProperty("Source")]

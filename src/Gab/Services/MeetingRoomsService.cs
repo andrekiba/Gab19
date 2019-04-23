@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Gab.Base;
 using Gab.Shared.Base;
 using Gab.Shared.Models;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Newtonsoft.Json;
 using Polly;
@@ -22,6 +26,9 @@ namespace Gab.Services
         #region Fields
 
         const string DateFormat = "yyyy-MM-ddTHH:mm:ss";
+        HubConnection hubConnection;
+        Random random;
+        readonly Subject<Event> eventChanged = new Subject<Event>();
 
         readonly IMeetingRoomsApi api;
         // Riprova 2 volte
@@ -47,6 +54,12 @@ namespace Gab.Services
                 context => { });
 
         #endregion
+
+        #region Properties
+        public bool IsHubConnected { get; private set; }
+        public IObservable<Event> WhenEventChanged => eventChanged.AsObservable();
+
+        #endregion 
 
         #region Constructor
         public MeetingRoomsService()
@@ -120,8 +133,8 @@ namespace Gab.Services
                     Id = Guid.Empty.ToString(),
                     Subject = "Test Meeting 1",
                     BodyPreview = "Ciao ciao!",
-                    Start = DateTime.Parse("2019-04-23T02:00:00"),
-                    End = DateTime.Parse("2019-04-23T03:00:00"),
+                    Start = DateTime.Parse("2019-04-23T15:00:00"),
+                    End = DateTime.Parse("2019-04-23T16:30:00"),
                     Organizer = "Andrea Ceroni",
                     TimeZone = "W. Europe Standard Time"
                 },
@@ -151,7 +164,14 @@ namespace Gab.Services
             return await BreakOrRetry(async () => await api.CreateEvent(Constants.MeetingRoomsFuncKey, createEvent, GetCancellationToken()));
         }
 
-        public async Task<Result<SignalRConnectionInfo>> GetHubInfo()
+        public async Task<Result> EndsEvent(EndsEvent endsEvent)
+        {
+            return await Task.FromResult(Result.Ok());
+
+            return await BreakOrRetry(async () => await api.EndsEvent(Constants.MeetingRoomsFuncKey, endsEvent, GetCancellationToken()));
+        }
+
+        async Task<Result<SignalRConnectionInfo>> GetHubInfo()
         {
             var connectionInfo = new SignalRConnectionInfo
             {
@@ -162,6 +182,87 @@ namespace Gab.Services
             return await Task.FromResult(Result.Ok(connectionInfo));
 
             return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
+        }
+
+        public async Task<Result> ConfigureHub()
+        {
+            try
+            {
+                random = new Random();
+                var connectionInfo = await GetHubInfo();
+                if (connectionInfo.IsFailure)
+                    return connectionInfo;
+
+                hubConnection = new HubConnectionBuilder()
+                    .WithUrl(connectionInfo.Value.Url, options =>
+                    {
+                        options.SkipNegotiation = true;
+                        options.Transports = HttpTransportType.WebSockets;
+                        options.AccessTokenProvider = () => Task.FromResult(connectionInfo.Value.AccessToken);
+                    })
+                    .Build();
+                
+
+                hubConnection.Closed += async (error) =>
+                {
+                    IsHubConnected = false;
+                    await Task.Delay(random.Next(0, 5) * 1000);
+                    try
+                    {
+                        await ConnectHub();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                };
+
+                hubConnection.On<Event>("EventChanged",  e =>
+                {
+                    eventChanged.OnNext(e);
+                });
+
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(e.Message);
+            }
+        }
+
+        public async Task<Result> ConnectHub()
+        {
+            try
+            {
+                if (IsHubConnected)
+                    return Result.Ok();
+
+                await hubConnection.StartAsync();
+
+                IsHubConnected = true;
+
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(e.Message);
+            }
+        }
+
+        public async Task<Result> DisconnectHub()
+        {
+            try
+            {
+                if (!IsHubConnected)
+                    return Result.Ok();
+                await hubConnection.StopAsync();
+                IsHubConnected = false;
+                return Result.Ok();
+            }
+            catch (Exception e)
+            {
+                return Result.Fail(e.Message);
+            }
         }
 
         Task<T> BreakOrRetry<T>(Func<Task<T>> func)

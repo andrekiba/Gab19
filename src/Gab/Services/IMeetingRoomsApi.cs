@@ -20,6 +20,9 @@ namespace Gab.Services
         [Post("/event")]
         Task<Result> CreateEvent([Header("x-functions-key")]string funcKey, [Body]CreateEvent createEvent, CancellationToken cancellationToken);
 
+        [Post("/event/ends")]
+        Task<Result> EndsEvent([Header("x-functions-key")]string funcKey, [Body]EndsEvent endsEvent, CancellationToken cancellationToken);
+
         [Post("/negotiate")]
         Task<Result<SignalRConnectionInfo>> GetHubInfo([Header("x-functions-key")]string funcKey, CancellationToken cancellationToken);
     }

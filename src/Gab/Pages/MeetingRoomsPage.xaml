@@ -5,21 +5,10 @@
              xmlns:lv="clr-namespace:Syncfusion.ListView.XForms;assembly=Syncfusion.SfListView.XForms"
              xmlns:ptr="clr-namespace:Syncfusion.SfPullToRefresh.XForms;assembly=Syncfusion.SfPullToRefresh.XForms"
              xmlns:ds="clr-namespace:Syncfusion.DataSource;assembly=Syncfusion.DataSource.Portable"
-             xmlns:beh="clr-namespace:Gab.Behaviors;assembly=Gab"
-             xmlns:models="clr-namespace:Gab.Shared.Models;assembly=Gab.Shared"
-             xmlns:converters="clr-namespace:Gab.Converters;assembly=Gab"
-             xmlns:ci="clr-namespace:ImageCircle.Forms.Plugin.Abstractions;assembly=ImageCircle.Forms.Plugin"
-             xmlns:iconize="clr-namespace:Plugin.Iconize;assembly=Plugin.Iconize"
              x:Class="Gab.Pages.MeetingRoomsPage"
              x:Name="MeetingRoomsPageName"
              Title="{Binding Resources[MeetingRoomsLabel]}">
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <converters:NameToInitialsConverter x:Key="NameToInitialsConverter" />
-        </ResourceDictionary>
-    </ContentPage.Resources>
-    
     <ptr:SfPullToRefresh x:Name="PullToRefresh"
                          ProgressBackgroundColor="{StaticResource LightGreen}" ProgressStrokeColor="White"
                          RefreshContentHeight="50" RefreshContentWidth="50" TransitionMode="SlideOnTop"
@@ -30,7 +19,7 @@
                            HorizontalOptions="Fill"
                            ItemsSource="{Binding MeetingRooms}"                          
                            SelectionMode="None"                            
-                           ItemSize="80"
+                           ItemSize="70"
                            ItemSpacing="0"
                            TapCommand="{Binding MeetingRoomCommand}">
                 <lv:SfListView.DataSource>
@@ -42,37 +31,7 @@
                 </lv:SfListView.DataSource>
                 <lv:SfListView.ItemTemplate>
                     <DataTemplate>
-                        <cells:BaseCell x:Name="MeetingRoomCell">
-                            <Grid Padding="10" ColumnSpacing="10">
-                                <Grid.Behaviors>
-                                    <beh:CollectionColoringBehavior x:TypeArguments="models:MeetingRoom" 
-                                                  ObservableCollection="{Binding ItemsSource, Source={x:Reference MeetingRoomList}}"/>
-                                </Grid.Behaviors>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="60"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Grid Grid.Column="0" HorizontalOptions="Start">
-                                    <ci:CircleImage WidthRequest="50" HeightRequest="50"
-                                                              VerticalOptions="Center" HorizontalOptions="Center"
-                                                              FillColor="Transparent" BorderColor="White" BorderThickness="2">
-                                    </ci:CircleImage>
-                                    <Label Text="{Binding Name, Converter={StaticResource NameToInitialsConverter}}"
-                                           VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" FontSize="25" />
-                                </Grid>
-
-                                <Label Grid.Column="1" Text="{Binding Name}" TextColor="White"
-                                       VerticalOptions="Center" VerticalTextAlignment="Center" />
-
-                                <iconize:IconLabel Grid.Column="2" Text="fas-chevron-right" FontSize="15" TextColor="White"
-                                                   HorizontalOptions="Center"  VerticalTextAlignment="Center"/>
-
-                            </Grid>
-                        </cells:BaseCell>
-                        <!--<cells:MeetingRoomCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomsPageName}}"/>-->
+                        <cells:MeetingRoomCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomsPageName}}"/>
                     </DataTemplate>
                 </lv:SfListView.ItemTemplate>
             </lv:SfListView>

@@ -4,21 +4,45 @@
              xmlns:cells="clr-namespace:Gab.Cells;assembly=Gab"
              xmlns:behaviors="clr-namespace:Gab.Behaviors;assembly=Gab"
              xmlns:models="clr-namespace:Gab.Shared.Models;assembly=Gab.Shared"
+             xmlns:abstractions="clr-namespace:ImageCircle.Forms.Plugin.Abstractions;assembly=ImageCircle.Forms.Plugin"
+             xmlns:iconize="clr-namespace:Plugin.Iconize;assembly=Plugin.Iconize"
+             xmlns:converters="clr-namespace:Gab.Converters;assembly=Gab"
+             x:Name="MeetingRoomCellName"
              x:Class="Gab.Cells.MeetingRoomCell">
-    
-    <Grid>
+
+  <Grid Padding="10" ColumnSpacing="10">
+
+        <Grid.Resources>
+          <ResourceDictionary>
+              <converters:NameToInitialsConverter x:Key="NameToInitialsConverter" />
+          </ResourceDictionary>
+      </Grid.Resources>
+
         <Grid.Behaviors>
-            <behaviors:CollectionColoringBehavior x:TypeArguments="models:MeetingRoom" 
-                                                  ObservableCollection="{Binding ItemsSource, Source={x:Reference MeetingRoomList}}"/>
+            <behaviors:MeetingRoomColoringBehavior ObservableCollection="{Binding Path=ParentBindingContext.MeetingRooms, Source={x:Reference MeetingRoomCellName}}"/>
         </Grid.Behaviors>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="60"/>
-        </Grid.ColumnDefinitions>
-        
-        <Label Text="{Binding Name}"/>
+      <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="60"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="30"/>
+      </Grid.ColumnDefinitions>
 
-    </Grid>
+      <Grid Grid.Column="0" HorizontalOptions="Start">
+          <abstractions:CircleImage WidthRequest="50" HeightRequest="50"
+                          VerticalOptions="Center" HorizontalOptions="Center"
+                          FillColor="Transparent" BorderColor="White" BorderThickness="2">
+          </abstractions:CircleImage>
+          <Label Text="{Binding Name, Converter={StaticResource NameToInitialsConverter}}"
+                 VerticalOptions="Center" HorizontalOptions="Center" TextColor="White" FontSize="25" />
+      </Grid>
+
+      <Label Grid.Column="1" Text="{Binding Name}" TextColor="White" FontSize="Large" FontAttributes="Bold"
+             VerticalOptions="Center" VerticalTextAlignment="Center" />
+
+      <iconize:IconLabel Grid.Column="2" Text="fas-chevron-right" FontSize="15" TextColor="White"
+                         HorizontalOptions="Center" VerticalTextAlignment="Center"/>
+
+  </Grid>
 
 </cells:BaseCell>

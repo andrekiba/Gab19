@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Gab.Base;
+using Gab.Shared.Models;
 using Xamarin.Forms;
 
 namespace Gab.Behaviors
 {
-    public class CollectionColoringBehavior<T> : Behavior<View> where T : class
+    public class MeetingRoomColoringBehavior : Behavior<View>
     {
         WeakReference<View> view;
         IDisposable subscription;
 
         public static BindableProperty ObservableCollectionProperty =
-            BindableProperty.Create(nameof(ObservableCollection), typeof(IList<T>), typeof(CollectionColoringBehavior<T>), propertyChanged: OnCollectionChanged);
-        public IList<T> ObservableCollection
+            BindableProperty.Create(nameof(ObservableCollection), typeof(IList<MeetingRoom>), typeof(MeetingRoomColoringBehavior), propertyChanged: OnCollectionChanged);
+        public IList<MeetingRoom> ObservableCollection
         {
-            get => (IList<T>)GetValue(ObservableCollectionProperty);
+            get => (IList<MeetingRoom>)GetValue(ObservableCollectionProperty);
             set
             {
                 SetValue(ObservableCollectionProperty, value);
@@ -24,21 +25,14 @@ namespace Gab.Behaviors
             }
         }
 
-        public static readonly BindableProperty ColorsProperty = BindableProperty.CreateAttached(nameof(Colors), typeof(List<Color>), typeof(CollectionColoringBehavior<T>), new List<Color>());
-        public List<Color> Colors
-        {
-            get => (List<Color>)GetValue(ColorsProperty);
-            set => SetValue(ColorsProperty, value);
-        }
-
-        public static BindableProperty IndexProperty = BindableProperty.Create(nameof(Index), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
+        public static BindableProperty IndexProperty = BindableProperty.Create(nameof(Index), typeof(int), typeof(MeetingRoomColoringBehavior), default(int));
         public int Index
         {
             get => (int)GetValue(IndexProperty);
             set => SetValue(IndexProperty, value);
         }
 
-        public static BindableProperty CountProperty = BindableProperty.Create(nameof(Count), typeof(int), typeof(CollectionColoringBehavior<T>), default(int));
+        public static BindableProperty CountProperty = BindableProperty.Create(nameof(Count), typeof(int), typeof(MeetingRoomColoringBehavior), default(int));
         public int Count
         {
             get => (int)GetValue(CountProperty);
@@ -47,10 +41,10 @@ namespace Gab.Behaviors
 
         static void OnCollectionChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var self = (CollectionColoringBehavior<T>)bindable;
+            var self = (MeetingRoomColoringBehavior)bindable;
             self.subscription?.Dispose();
 
-            var newCollection = newValue as ObservableCollection<T>;
+            var newCollection = newValue as ObservableCollection<MeetingRoom>;
             self.subscription = newCollection?.WhenCollectionChanged().Subscribe(x => self.CalculateColor());
         }
 
@@ -74,8 +68,7 @@ namespace Gab.Behaviors
             //yield control to avoid a race condition
             await Task.Delay(1);
             View sameView = null;
-            T item;
-            if (ObservableCollection == null || view?.TryGetTarget(out sameView) != true || (item = sameView.BindingContext as T) == null)
+            if (ObservableCollection == null || view?.TryGetTarget(out sameView) != true || !(sameView.BindingContext is MeetingRoom item))
                 return;
             try
             {
@@ -84,10 +77,8 @@ namespace Gab.Behaviors
                 var colors = Constants.Colors.MeetingRoomColors;
 
                 var color = colors[(count - index - 1) % colors.Count];
-
-                var backgroundColor = color;
-
-                sameView.BackgroundColor = backgroundColor;
+                item.Color = color.ToHex();
+                sameView.BackgroundColor = color;
             }
             catch(Exception ex)
             {

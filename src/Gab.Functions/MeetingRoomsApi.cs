@@ -172,6 +172,39 @@ namespace Gab.Functions
             }
         }
 
+        [FunctionName("EndsEvent")]
+        public async Task<IActionResult> EndsEvent(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "event/ends")] HttpRequest req)
+        {
+            try
+            {
+                var graphClient = GetGraphClient(configuration.GraphV1);
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var input = JsonConvert.DeserializeObject<EndsEvent>(requestBody);
+
+                var timeZone = input.TimeZone;
+
+                var endTime = new DateTimeTimeZone
+                {
+                    DateTime = input.Ended.ToString("s"),
+                    TimeZone = timeZone
+                };
+
+                await graphClient.Users[input.MeetingRoom.Mail].Events[input.Id].Request().UpdateAsync(new Microsoft.Graph.Event
+                {
+                    End = endTime
+                });
+
+                return new OkObjectResult(Result.Ok());
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return new OkObjectResult(Result.Fail(error));
+            }
+        }
+
         #endregion
 
         #region Subscriptions
@@ -308,8 +341,8 @@ namespace Gab.Functions
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
-                        Target = $"Event{notification.ChangeType.UppercaseFirst()}",
-                        Arguments = new object[] { ev.ToEvent() }
+                        Target = "EventChanged",
+                        Arguments = new object[] { ev.ToEvent((ChangeType)Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst())) }
                     });
             }
             catch (Exception e)

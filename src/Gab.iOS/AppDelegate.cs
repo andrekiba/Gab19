@@ -36,7 +36,15 @@ namespace Gab.iOS
             FormsControls.Touch.Main.Init();
             SfPullToRefreshRenderer.Init();
             SfListViewRenderer.Init();
+            Syncfusion.XForms.iOS.ProgressBar.SfCircularProgressBarRenderer.Init();
             LoadApplication(new App());
+
+            #region Theme
+
+            UINavigationBar.Appearance.SetTitleTextAttributes(new UITextAttributes { TextColor = UIColor.Black });
+            UINavigationBar.Appearance.TintColor = UIColor.Black;
+
+            #endregion
 
             return base.FinishedLaunching(app, options);
         }
