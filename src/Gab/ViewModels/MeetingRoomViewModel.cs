@@ -114,9 +114,12 @@ namespace Gab.ViewModels
                 SetCurrentEvent();
             });
 
-            await mrService.ConfigureHub();
-            await mrService.ConnectHub();
-            SubscribeToHub();
+            var startHub = await mrService.ConfigureHub()
+                .OnSuccess(() => mrService.ConnectHub())
+                .OnSuccess(SubscribeToHub);
+            
+            if(startHub.IsFailure)
+                await UserDialogs.Instance.AlertAsync(startHub.Error, AppResources.Error, AppResources.Ok);
 
             RefreshCommand.Execute(null);
         }
@@ -247,22 +250,36 @@ namespace Gab.ViewModels
         {
             eventChangedSub = mrService.WhenEventChanged.Subscribe(e =>
             {
-                switch (e.ChangeType)
+                try
                 {
-                    case ChangeType.Created:
-                        Events.Add(e);
-                        break;
-                    case ChangeType.Updated:
-                        Events.Replace(e);
-                        break;
-                    case ChangeType.Deleted:
-                        Events.Remove(e);
-                        break;
-                    case ChangeType.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (e.ChangeType)
+                    {
+                        case ChangeType.Created:
+                        case ChangeType.Updated:
+                            e.Start = TimeZoneInfo.ConvertTimeFromUtc(e.Start, TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome"));
+                            e.End = TimeZoneInfo.ConvertTimeFromUtc(e.End, TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome"));
+                            var ev = Events.SingleOrDefault(x => x.Id == e.Id);
+                            if (ev != null)
+                            {
+                                ev.Update(e);
+                                SetCurrentEvent();
+                            }                              
+                            else
+                                Events.Add(e);
+                            break;
+                        case ChangeType.Deleted:
+                            Events.Remove(e);
+                            break;
+                        case ChangeType.None:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }            
             });
         }
 

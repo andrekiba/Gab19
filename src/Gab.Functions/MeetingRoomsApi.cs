@@ -328,9 +328,10 @@ namespace Gab.Functions
             }
         }
 
-        [FunctionName("Notifier")]
-        public async Task Notifier(
-            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification,
+        [FunctionName("NotifierTest")]
+        public async Task NotifierTest(
+            
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "notifierTest")] Notification notification,
             [SignalR(HubName = "gab19")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
             try
@@ -342,7 +343,7 @@ namespace Gab.Functions
                 if (changeType != ChangeType.Deleted)
                 {
                     var graphEvent = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
-                    ev = graphEvent.ToEvent();
+                    ev = graphEvent.ToEvent(changeType);
                 }
                 else
                 {
@@ -367,21 +368,51 @@ namespace Gab.Functions
             }
         }
 
-        [FunctionName("HubInfo")]
-        public Result<SignalRConnectionInfo> HubInfo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
-            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
+        [FunctionName("Notifier")]
+        public async Task Notifier(
+            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification,
+            [SignalR(HubName = "gab19")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
             try
             {
-                return Result.Ok(connectionInfo);
+                var graphClient = GetGraphClient(configuration.GraphV1);
+                var user = notification.Resource.Path.Split('/')[1];
+                var changeType = (ChangeType)Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst());
+                Event ev;
+                if (changeType != ChangeType.Deleted)
+                {
+                    var graphEvent = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
+                    ev = graphEvent.ToEvent(changeType);
+                }
+                else
+                {
+                    ev = new Event
+                    {
+                        Id = notification.Resource.Id,
+                        ChangeType = ChangeType.Deleted
+                    };
+                }
+
+                await signalRMessages.AddAsync(
+                    new SignalRMessage
+                    {
+                        Target = "EventChanged",
+                        Arguments = new object[] { ev }
+                    });
             }
             catch (Exception e)
             {
                 var error = $"{e.Message}\n\r{e.StackTrace}";
                 log.Error(error);
-                return Result.Fail<SignalRConnectionInfo>(error);
-            }           
+            }
+        }
+
+        [FunctionName("HubInfo")]
+        public SignalRConnectionInfo HubInfo(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
+            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
+        {
+            return connectionInfo;
         }
 
         #endregion

@@ -18,6 +18,19 @@ namespace Gab.Shared.Models
         [JsonIgnore]
         public bool IsCurrent { get; set; }
 
+        public Event Update(Event e)
+        {
+            Start = e.Start;
+            End = e.End;
+            BodyPreview = e.BodyPreview;
+            ChangeType = e.ChangeType;
+            Organizer = e.Organizer;
+            Subject = e.Subject;
+            TimeZone = e.TimeZone;
+
+            return this;
+        }
+
         #region Equals
 
         public override bool Equals(object obj) => Equals(obj as Event);

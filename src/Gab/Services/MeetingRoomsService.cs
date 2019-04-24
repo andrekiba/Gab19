@@ -202,7 +202,7 @@ namespace Gab.Services
             return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
         }
 
-        public async Task<Result> ConfigureHub()
+        public Task<Result> ConfigureHub()
         {
             try
             {
@@ -221,11 +221,12 @@ namespace Gab.Services
                 //    .Build();
 
                 hubConnection = new HubConnectionBuilder()
-                    .WithUrl(Constants.MeetingRoomsApi, options =>
-                    {
-                        options.SkipNegotiation = true;
-                        options.Transports = HttpTransportType.WebSockets;                      
-                    })
+                    .WithUrl(Constants.MeetingRoomsApi)
+                    //.WithUrl(Constants.MeetingRoomsApi, options =>
+                    //{
+                    //    options.SkipNegotiation = true;
+                    //    options.Transports = HttpTransportType.WebSockets;                      
+                    //})
                     .Build();
 
                 hubConnection.Closed += async (error) =>
@@ -247,11 +248,11 @@ namespace Gab.Services
                     eventChanged.OnNext(e);
                 });
 
-                return Result.Ok();
+                return Task.FromResult(Result.Ok());
             }
             catch (Exception e)
             {
-                return Result.Fail(e.Message);
+                return Task.FromResult(Result.Fail(e.Message));
             }
         }
 
