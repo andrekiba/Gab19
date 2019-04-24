@@ -207,19 +207,26 @@ namespace Gab.Services
             try
             {
                 random = new Random();
-                var connectionInfo = await GetHubInfo();
-                if (connectionInfo.IsFailure)
-                    return connectionInfo;
+                //var connectionInfo = await GetHubInfo();
+                //if (connectionInfo.IsFailure)
+                //    return connectionInfo;
+
+                //hubConnection = new HubConnectionBuilder()
+                //    .WithUrl(connectionInfo.Value.Url, options =>
+                //    {
+                //        options.SkipNegotiation = true;
+                //        options.Transports = HttpTransportType.WebSockets;
+                //        options.AccessTokenProvider = () => Task.FromResult(connectionInfo.Value.AccessToken);
+                //    })
+                //    .Build();
 
                 hubConnection = new HubConnectionBuilder()
-                    .WithUrl(connectionInfo.Value.Url, options =>
+                    .WithUrl(Constants.MeetingRoomsApi, options =>
                     {
                         options.SkipNegotiation = true;
-                        options.Transports = HttpTransportType.WebSockets;
-                        options.AccessTokenProvider = () => Task.FromResult(connectionInfo.Value.AccessToken);
+                        options.Transports = HttpTransportType.WebSockets;                      
                     })
                     .Build();
-                
 
                 hubConnection.Closed += async (error) =>
                 {

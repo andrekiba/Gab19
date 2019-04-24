@@ -337,12 +337,27 @@ namespace Gab.Functions
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
                 var user = notification.Resource.Path.Split('/')[1];
-                var ev = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
+                var changeType = (ChangeType) Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst());
+                Event ev;
+                if (changeType != ChangeType.Deleted)
+                {
+                    var graphEvent = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
+                    ev = graphEvent.ToEvent();
+                }
+                else
+                {
+                    ev = new Event
+                    {
+                        Id = notification.Resource.Id,
+                        ChangeType = ChangeType.Deleted
+                    };
+                }
+                
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
                         Target = "EventChanged",
-                        Arguments = new object[] { ev.ToEvent((ChangeType)Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst())) }
+                        Arguments = new object[] { ev }
                     });
             }
             catch (Exception e)

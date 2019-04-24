@@ -42,7 +42,7 @@
                            TextColor="{Binding Path=ParentBindingContext.BookedColor, Source={x:Reference EventCellName}}"
                            HorizontalOptions="Center" VerticalTextAlignment="Center">
             <iconize:IconLabel.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding Path=ParentBindingContext.EndsEventCommand}"/>
+                <TapGestureRecognizer Command="{Binding Path=ParentBindingContext.EndsEventCommand, Source={x:Reference EventCellName}}"/>
             </iconize:IconLabel.GestureRecognizers>
         </iconize:IconLabel>
 
