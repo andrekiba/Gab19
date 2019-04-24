@@ -78,8 +78,8 @@ namespace Gab.Shared.Models
                 Id = e.Id,
                 Subject = e.Subject,
                 BodyPreview = e.BodyPreview,
-                Start = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.Start.DateTime), e.OriginalStartTimeZone),
-                End = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.End.DateTime), e.OriginalStartTimeZone),
+                Start = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.Start.DateTime), e.OriginalStartTimeZone, e.OriginalStartTimeZone),
+                End = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.End.DateTime), e.OriginalStartTimeZone, e.OriginalStartTimeZone),
                 Organizer = e.Organizer.EmailAddress.Name,
                 TimeZone = e.OriginalStartTimeZone,
                 ChangeType = changeType
