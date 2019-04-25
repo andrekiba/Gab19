@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Gab.Functions.Configuration;
 using Gab.Shared.Base;
+using Gab.Shared.Messages;
 using Gab.Shared.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -211,12 +212,15 @@ namespace Gab.Functions
 
         [FunctionName("Subscribe")]
         public async Task<IActionResult> Subscribe(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe")] CreateSubscription createSub,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe")] HttpRequest req,
             [Table("subscriptions", Connection = "AzureWebJobsStorage")] CloudTable subTable)
         {
             try
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
+
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var createSub = JsonConvert.DeserializeObject<CreateSubscription>(requestBody);
 
                 var subscription = new Subscription
                 {
@@ -373,7 +377,8 @@ namespace Gab.Functions
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
-                        Target = "EventChanged",
+                        //GroupName = user,
+                        Target = HubMessages.EventChanged,
                         Arguments = new object[] { ev }
                     });
             }
@@ -412,8 +417,8 @@ namespace Gab.Functions
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
-                        GroupName = user,
-                        Target = "EventChanged",
+                        //GroupName = user,
+                        Target = HubMessages.EventChanged,
                         Arguments = new object[] { ev }
                     });
             }
@@ -433,18 +438,28 @@ namespace Gab.Functions
         }
 
         [FunctionName("AddToHubGroup")]
-        public static Task AddToGroup(
+        public async Task<IActionResult> AddToHubGroup(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addToHubGroup/{userId}")]HttpRequest req,
             string userId,
             [SignalR(HubName = "gab19")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
         {
-            return signalRGroupActions.AddAsync(
-                new SignalRGroupAction
+            try
+            {
+                await signalRGroupActions.AddAsync(new SignalRGroupAction
                 {
                     UserId = userId,
                     GroupName = userId,
                     Action = GroupAction.Add
                 });
+
+                return new OkObjectResult(Result.Ok());
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return new OkObjectResult(Result.Fail(error));
+            }
         }
 
         #endregion

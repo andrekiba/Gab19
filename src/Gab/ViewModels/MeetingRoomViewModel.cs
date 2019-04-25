@@ -208,8 +208,11 @@ namespace Gab.ViewModels
                 {
                     return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1))
                         .OnFailure(error => Events.Clear())
-                        .OnSuccess(events => Events.ReplaceRange(events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone))));
-                        //.OnSuccess(events => Events = new ObservableRangeCollection<Event>(events));
+                        .OnSuccess(events =>
+                        {
+                            var convEvents = events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
+                            Events.ReplaceRange(convEvents);
+                        });
 
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
 

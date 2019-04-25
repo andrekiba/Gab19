@@ -10,8 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gab.Base;
 using Gab.Shared.Base;
+using Gab.Shared.Messages;
 using Gab.Shared.Models;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Newtonsoft.Json;
@@ -213,7 +213,6 @@ namespace Gab.Services
         public async Task<Result> AddToHubGroup(string userId)
         {
             //return await Task.FromResult(Result.Ok());
-
             return await BreakOrRetry(async () => await api.AddToHubGroup(Constants.MeetingRoomsFuncKey, userId, GetCancellationToken()));
         }
 
@@ -226,22 +225,8 @@ namespace Gab.Services
                 //if (connectionInfo.IsFailure)
                 //    return connectionInfo;
 
-                //hubConnection = new HubConnectionBuilder()
-                //    .WithUrl(connectionInfo.Value.Url, options =>
-                //    {
-                //        options.SkipNegotiation = true;
-                //        options.Transports = HttpTransportType.WebSockets;
-                //        options.AccessTokenProvider = () => Task.FromResult(connectionInfo.Value.AccessToken);
-                //    })
-                //    .Build();
-
                 hubConnection = new HubConnectionBuilder()
                     .WithUrl(Constants.MeetingRoomsApi)
-                    //.WithUrl(Constants.MeetingRoomsApi, options =>
-                    //{
-                    //    options.SkipNegotiation = true;
-                    //    options.Transports = HttpTransportType.WebSockets;                      
-                    //})
                     .Build();
 
                 hubConnection.Closed += async (error) =>
@@ -258,7 +243,7 @@ namespace Gab.Services
                     }
                 };
 
-                hubConnection.On<Event>("EventChanged",  e =>
+                hubConnection.On<Event>(HubMessages.EventChanged,  e =>
                 {
                     eventChanged.OnNext(e);
                 });

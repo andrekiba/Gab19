@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Newtonsoft.Json;
 using PropertyChanged;
 
@@ -99,17 +100,18 @@ namespace Gab.Shared.Models
     {
         public static Event ToEvent(this Microsoft.Graph.Event e, ChangeType changeType = ChangeType.None)
         {
-            return new Event
+            var ev = new Event
             {
                 Id = e.Id,
                 Subject = e.Subject,
                 BodyPreview = e.BodyPreview,
-                Start = DateTime.Parse(e.Start.DateTime).ToUniversalTime(),
-                End = DateTime.Parse(e.End.DateTime).ToUniversalTime(),
+                Start = DateTime.Parse(e.Start.DateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).ToUniversalTime(),
+                End = DateTime.Parse(e.End.DateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).ToUniversalTime(),
                 Organizer = e.Organizer.EmailAddress.Name,
                 TimeZone = e.OriginalStartTimeZone,
                 ChangeType = changeType
             };
+            return ev;
         }
     }
 

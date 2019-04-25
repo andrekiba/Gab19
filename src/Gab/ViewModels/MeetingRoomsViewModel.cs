@@ -93,7 +93,6 @@ namespace Gab.ViewModels
                 {
                     return await mrService.GetMeetingRooms()
                         .OnFailure(error => MeetingRooms.Clear())
-                        //.OnSuccess(mrs => MeetingRooms = new ObservableRangeCollection<MeetingRoom>(mrs));
                         .OnSuccess(mrs => MeetingRooms.ReplaceRange(mrs));
                     
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
