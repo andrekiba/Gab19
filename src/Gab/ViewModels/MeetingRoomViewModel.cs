@@ -266,35 +266,38 @@ namespace Gab.ViewModels
         {
             eventChangedSub = mrService.WhenEventChanged.Subscribe(e =>
             {
-                try
+                Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    switch (e.ChangeType)
+                    try
                     {
-                        case ChangeType.Created:
-                        case ChangeType.Updated:
-                            e.ConvertTimeToTimeZone(CurrentXamarinTimeZone);
-                            var ev = Events.SingleOrDefault(x => x.Id == e.Id);
-                            if (ev != null)
-                            {
-                                ev.Update(e);
-                                SetCurrentEvent();
-                            }                              
-                            else
-                                Events.Add(e);
-                            break;
-                        case ChangeType.Deleted:
-                            Events.Remove(e);
-                            break;
-                        case ChangeType.None:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        switch (e.ChangeType)
+                        {
+                            case ChangeType.Created:
+                            case ChangeType.Updated:
+                                e.ConvertTimeToTimeZone(CurrentXamarinTimeZone);
+                                var ev = Events.SingleOrDefault(x => x.Id == e.Id);
+                                if (ev != null)
+                                {
+                                    ev.Update(e);
+                                    SetCurrentEvent();
+                                }
+                                else
+                                    Events.Add(e);
+                                break;
+                            case ChangeType.Deleted:
+                                Events.Remove(e);
+                                break;
+                            case ChangeType.None:
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }            
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
+                });                     
             });
         }
 

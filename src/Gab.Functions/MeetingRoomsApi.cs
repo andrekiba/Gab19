@@ -217,8 +217,10 @@ namespace Gab.Functions
         {
             try
             {
-                var graphClient = GetGraphClient(configuration.GraphV1);
+                await subTable.CreateIfNotExistsAsync();
 
+                var graphClient = GetGraphClient(configuration.GraphV1);
+                
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
                 var createSub = JsonConvert.DeserializeObject<CreateSubscription>(requestBody);
 
@@ -272,6 +274,8 @@ namespace Gab.Functions
         {
             try
             {
+                await subTable.CreateIfNotExistsAsync();
+
                 var graphClient = GetGraphClient(configuration.GraphV1);
 
                 var query = new TableQuery<SubscriptionEntity>();
