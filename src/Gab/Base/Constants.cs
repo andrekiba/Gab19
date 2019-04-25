@@ -12,6 +12,7 @@ namespace Gab.Base
         public const string MeetingRoomsApi = "https://7fe9d313.ngrok.io/api";
         //public const string MeetingRoomsApi = "https://gab19.azurewebsites.net/api";
         public const string MeetingRoomsFuncKey = "VC4ave2hq0N1O0vxEGqkfDLiawNS0Q5IZ6jakWLqSTQ4yIg2gWsn2A==";
+        public static string NotificationUrl => $"{MeetingRoomsApi}/notification";
 
         //syncfusion
         public const string SyncfusionLicenseKey = "OTI4NzJAMzEzNzJlMzEyZTMwVDhlOGR5YllxWTVTM0Jpa09mUGtyNStnQWVDQXpqS29wVWV6bW1BRzNrbz0=";

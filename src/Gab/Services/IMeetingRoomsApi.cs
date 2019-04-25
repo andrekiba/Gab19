@@ -25,5 +25,11 @@ namespace Gab.Services
 
         [Post("/negotiate")]
         Task<Result<SignalRConnectionInfo>> GetHubInfo([Header("x-functions-key")]string funcKey, CancellationToken cancellationToken);
+
+        [Post("/subscribe")]
+        Task<Result> Subscribe([Header("x-functions-key")]string funcKey, [Body]CreateSubscription createSubscription, CancellationToken cancellationToken);
+
+        [Post("/addToHubGroup/{userId}")]
+        Task<Result> AddToHubGroup([Header("x-functions-key")]string funcKey, string userId, CancellationToken cancellationToken);
     }
 }

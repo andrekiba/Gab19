@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace Gab.Functions.Configuration
 {
@@ -14,6 +11,7 @@ namespace Gab.Functions.Configuration
         public string GraphBaseUrl { get; }
         public string GraphV1 { get; }
         public string GraphBeta { get; }
+        public string MeetingRoomsApi { get; }
 
 
         readonly IConfigurationRoot config;
@@ -31,6 +29,7 @@ namespace Gab.Functions.Configuration
             GraphBaseUrl = config.GetValue<string>("GraphBaseUrl");
             GraphV1 = $"{GraphBaseUrl}v1.0";
             GraphBeta = $"{GraphBaseUrl}beta";
+            MeetingRoomsApi = config.GetValue<string>("MeetingRoomsApi");
         }
 
         public string GetValue(string key) => config.GetValue<string>(key);

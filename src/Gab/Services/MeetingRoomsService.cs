@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Reactive.Linq;
@@ -189,7 +190,14 @@ namespace Gab.Services
             return await BreakOrRetry(async () => await api.EndsEvent(Constants.MeetingRoomsFuncKey, endsEvent, GetCancellationToken()));
         }
 
-        async Task<Result<SignalRConnectionInfo>> GetHubInfo()
+        public async Task<Result> Subscribe(CreateSubscription createSubscription)
+        {
+            //return await Task.FromResult(Result.Ok());
+
+            return await BreakOrRetry(async () => await api.Subscribe(Constants.MeetingRoomsFuncKey, createSubscription, GetCancellationToken()));
+        }
+
+        public async Task<Result<SignalRConnectionInfo>> GetHubInfo()
         {
             //var connectionInfo = new SignalRConnectionInfo
             //{
@@ -200,6 +208,13 @@ namespace Gab.Services
             //return await Task.FromResult(Result.Ok(connectionInfo));
 
             return await BreakOrRetry(async () => await api.GetHubInfo(Constants.MeetingRoomsFuncKey, GetCancellationToken()));
+        }
+
+        public async Task<Result> AddToHubGroup(string userId)
+        {
+            //return await Task.FromResult(Result.Ok());
+
+            return await BreakOrRetry(async () => await api.AddToHubGroup(Constants.MeetingRoomsFuncKey, userId, GetCancellationToken()));
         }
 
         public Task<Result> ConfigureHub()
@@ -239,7 +254,7 @@ namespace Gab.Services
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Debug.WriteLine(e);
                     }
                 };
 

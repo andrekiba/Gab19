@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
@@ -27,6 +29,7 @@ namespace Gab.ViewModels
         IDisposable eventChangedSub;
         IDisposable eventsChangedSub;
         const string CurrentTimeZone = "W. Europe Standard Time";
+        const string CurrentXamarinTimeZone = "Europe/Rome";
 
         #endregion
 
@@ -44,32 +47,10 @@ namespace Gab.ViewModels
         public bool Booked => CurrentEvent != null;
 
         [DependsOn(nameof(CurrentEvent))]
-        //public int CurrentEventDuraion => CurrentEvent != null ? (int)(CurrentEvent.Start - CurrentEvent.End).TotalSeconds : 0;
-        public int CurrentEventDuraion
-        {
-            get
-            {
-                if (CurrentEvent == null)
-                    return 0;
-
-                var duration = (int) (CurrentEvent.End - CurrentEvent.Start).TotalSeconds;
-                return duration;
-            }   
-        }
+        public int CurrentEventDuraion => CurrentEvent != null ? (int)(CurrentEvent.End - CurrentEvent.Start).TotalSeconds : 0;
 
         [DependsOn(nameof(CurrentEvent))]
-        //public double CurrentEventProgress => CurrentEvent != null ? (DateTime.Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuraion : 0;
-        public double CurrentEventProgress
-        {
-            get
-            {
-                if (CurrentEvent == null)
-                    return 0;
-
-                var progress = (DateTime.Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuraion;
-                return progress;
-            }
-        }
+        public double CurrentEventProgress => CurrentEvent != null ? (DateTime.Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuraion : 0;
 
         public Color MeetingRoomColor => MeetingRoom != null ? Color.FromHex(MeetingRoom.Color) : (Color)Application.Current.Resources["GrayDark"];
         public Color FreeColor => (Color)Application.Current.Resources["LightGreen"];
@@ -94,32 +75,20 @@ namespace Gab.ViewModels
             MeetingRoom = meetingRoom;
         }
 
-        protected override async void ViewIsAppearing(object sender, EventArgs e)
+        protected override void ViewIsAppearing(object sender, EventArgs e)
         {
             base.ViewIsAppearing(sender, e);
 
-            Device.StartTimer(TimeSpan.FromMinutes(1), () =>
+            Setup().ToObservable().Subscribe(
+            async setupResult =>
             {
-                Now = DateTime.Now;
-                SetCurrentEvent();
-                return true;
-            });
-            //timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x =>
-            //{
-            //    Now = DateTime.Now;
-            //    SetCurrentEvent();
-            //});
-            eventsChangedSub = Events.WhenCollectionChanged().Subscribe(x =>
+                if (setupResult.IsFailure)
+                    await UserDialogs.Instance.AlertAsync(setupResult.Error, AppResources.Error, AppResources.Ok);
+            },
+            async ex =>
             {
-                SetCurrentEvent();
+                await UserDialogs.Instance.AlertAsync(ex.Message, AppResources.Error, AppResources.Ok);
             });
-
-            var startHub = await mrService.ConfigureHub()
-                .OnSuccess(() => mrService.ConnectHub())
-                .OnSuccess(SubscribeToHub);
-            
-            if(startHub.IsFailure)
-                await UserDialogs.Instance.AlertAsync(startHub.Error, AppResources.Error, AppResources.Ok);
 
             RefreshCommand.Execute(null);
         }
@@ -159,6 +128,50 @@ namespace Gab.ViewModels
 
         #region Methods
 
+        async Task<Result> Setup()
+        {
+            Device.StartTimer(TimeSpan.FromMinutes(1), () =>
+            {
+                Now = DateTime.Now;
+                SetCurrentEvent();
+                return true;
+            });
+            
+            //timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x =>
+            //{
+            //    Now = DateTime.Now;
+            //    SetCurrentEvent();
+            //});
+
+            eventsChangedSub = Events.WhenCollectionChanged().Subscribe(x =>
+            {
+                SetCurrentEvent();
+            });
+
+            var subscription = await mrService.Subscribe(new CreateSubscription
+            {
+                Resource = $"users/{MeetingRoom.Id}/events",
+                ChangeType = "created,updated,deleted",
+                ExpirationDateTime = DateTimeOffset.UtcNow.AddDays(2),
+                NotificationUrl = Constants.NotificationUrl,
+                ClientState = "superSegreto"
+            });
+
+            if (subscription.IsFailure)
+                return subscription;
+
+            var startHub = await mrService.ConfigureHub()
+                .OnSuccess(() => mrService.ConnectHub())
+                .OnSuccess(SubscribeToHub);
+
+            if (startHub.IsFailure)
+                return startHub;
+
+            var addToGroup = await mrService.AddToHubGroup(MeetingRoom.Id);
+
+            return addToGroup.IsFailure ? addToGroup : Result.Ok();
+        }
+
         void SetCurrentEvent()
         {
             var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
@@ -193,9 +206,9 @@ namespace Gab.ViewModels
 
                 var result = await Do(async () =>
                 {
-                    return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1), CurrentTimeZone)
+                    return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1))
                         .OnFailure(error => Events.Clear())
-                        .OnSuccess(events => Events.ReplaceRange(events));
+                        .OnSuccess(events => Events.ReplaceRange(events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone))));
                         //.OnSuccess(events => Events = new ObservableRangeCollection<Event>(events));
 
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
@@ -256,8 +269,7 @@ namespace Gab.ViewModels
                     {
                         case ChangeType.Created:
                         case ChangeType.Updated:
-                            e.Start = TimeZoneInfo.ConvertTimeFromUtc(e.Start, TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome"));
-                            e.End = TimeZoneInfo.ConvertTimeFromUtc(e.End, TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome"));
+                            e.ConvertTimeToTimeZone(CurrentXamarinTimeZone);
                             var ev = Events.SingleOrDefault(x => x.Id == e.Id);
                             if (ev != null)
                             {
@@ -278,7 +290,7 @@ namespace Gab.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.Message);
                 }            
             });
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Gab.Base;
 using Gab.Shared.Models;
@@ -83,7 +84,7 @@ namespace Gab.Behaviors
             catch(Exception ex)
             {
                 // Let's not crash because of a coloring fail :)
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
             }
         }
     }

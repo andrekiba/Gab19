@@ -211,27 +211,43 @@ namespace Gab.Functions
 
         [FunctionName("Subscribe")]
         public async Task<IActionResult> Subscribe(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscription")] HttpRequest req,
-            [Table("subscriptions", Connection = "AzureWebJobsStorage")] IAsyncCollector<SubscriptionEntity> subTable)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe")] CreateSubscription createSub,
+            [Table("subscriptions", Connection = "AzureWebJobsStorage")] CloudTable subTable)
         {
             try
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var sub = JsonConvert.DeserializeObject<CreateSubscription>(requestBody);
 
                 var subscription = new Subscription
                 {
-                    ChangeType = sub.ChangeType,
-                    ClientState = sub.ClientState,
-                    ExpirationDateTime = sub.ExpirationDateTime,
-                    NotificationUrl = sub.NotificationUrl,
-                    Resource = sub.Resource
+                    ChangeType = createSub.ChangeType,
+                    ClientState = createSub.ClientState,
+                    ExpirationDateTime = createSub.ExpirationDateTime,
+                    NotificationUrl = createSub.NotificationUrl.IsNullOrWhiteSpace() ? 
+                        $"{configuration.MeetingRoomsApi}/notification" : 
+                        createSub.NotificationUrl,
+                    Resource = createSub.Resource
                 };
 
-                var createdSub = await graphClient.Subscriptions.Request().AddAsync(subscription);
+                var existingSubs = (await graphClient.Subscriptions.Request()
+                    //.Filter($"resource eq '{subscription.Resource}'")
+                    .GetAsync()).ToList();
+                var existingSub = existingSubs.SingleOrDefault(s => s.Resource.Equals(subscription.Resource, StringComparison.InvariantCultureIgnoreCase));
+                if (existingSub != null)
+                {
+                    await graphClient.Subscriptions[existingSub.Id].Request().DeleteAsync();
+                    var deleteOperation = TableOperation.Delete(new SubscriptionEntity
+                    {
+                        PartitionKey = "SUBSCRIPTION",
+                        RowKey = existingSub.Id,
+                        ETag = "*"
+                    });
+                    await subTable.ExecuteAsync(deleteOperation);
+                }
 
-                await subTable.AddAsync(createdSub.ToSubscriptionEntity());
+                var createdSub = await graphClient.Subscriptions.Request().AddAsync(subscription);
+                var insertOperation = TableOperation.Insert(createdSub.ToSubscriptionEntity());
+                await subTable.ExecuteAsync(insertOperation);
 
                 log.Information($"Created new subscription with id:{createdSub.Id}");
 
@@ -338,7 +354,7 @@ namespace Gab.Functions
             {
                 var graphClient = GetGraphClient(configuration.GraphV1);
                 var user = notification.Resource.Path.Split('/')[1];
-                var changeType = (ChangeType) Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst());
+                var changeType = (ChangeType)Enum.Parse(typeof(ChangeType), notification.ChangeType.UppercaseFirst());
                 Event ev;
                 if (changeType != ChangeType.Deleted)
                 {
@@ -396,6 +412,7 @@ namespace Gab.Functions
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
+                        GroupName = user,
                         Target = "EventChanged",
                         Arguments = new object[] { ev }
                     });
@@ -413,6 +430,21 @@ namespace Gab.Functions
             [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
         {
             return connectionInfo;
+        }
+
+        [FunctionName("AddToHubGroup")]
+        public static Task AddToGroup(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addToHubGroup/{userId}")]HttpRequest req,
+            string userId,
+            [SignalR(HubName = "gab19")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
+        {
+            return signalRGroupActions.AddAsync(
+                new SignalRGroupAction
+                {
+                    UserId = userId,
+                    GroupName = userId,
+                    Action = GroupAction.Add
+                });
         }
 
         #endregion

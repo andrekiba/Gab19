@@ -7,6 +7,8 @@ namespace Gab.Shared.Models
     [AddINotifyPropertyChangedInterface]
     public class Event
     {
+        #region Properties
+
         public string Id { get; set; }
         public string Subject { get; set; }
         public string BodyPreview { get; set; }
@@ -18,6 +20,10 @@ namespace Gab.Shared.Models
         [JsonIgnore]
         public bool IsCurrent { get; set; }
 
+        #endregion
+
+        #region Methods
+
         public Event Update(Event e)
         {
             Start = e.Start;
@@ -28,6 +34,13 @@ namespace Gab.Shared.Models
             Subject = e.Subject;
             TimeZone = e.TimeZone;
 
+            return this;
+        }
+
+        public Event ConvertTimeToTimeZone(string timeZone)
+        {
+            Start = TimeZoneInfo.ConvertTimeFromUtc(Start, TimeZoneInfo.FindSystemTimeZoneById(timeZone));
+            End = TimeZoneInfo.ConvertTimeFromUtc(End, TimeZoneInfo.FindSystemTimeZoneById(timeZone));
             return this;
         }
 
@@ -65,7 +78,7 @@ namespace Gab.Shared.Models
 
         #endregion 
 
-        //public void RaisePropertyChanged([CallerMemberName] string propertyName = null) => OnPropertyChanged(propertyName);
+        #endregion 
     }
 
     public class CreateEvent
@@ -91,8 +104,8 @@ namespace Gab.Shared.Models
                 Id = e.Id,
                 Subject = e.Subject,
                 BodyPreview = e.BodyPreview,
-                Start = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.Start.DateTime), e.OriginalStartTimeZone, e.OriginalStartTimeZone),
-                End = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Parse(e.End.DateTime), e.OriginalStartTimeZone, e.OriginalStartTimeZone),
+                Start = DateTime.Parse(e.Start.DateTime).ToUniversalTime(),
+                End = DateTime.Parse(e.End.DateTime).ToUniversalTime(),
                 Organizer = e.Organizer.EmailAddress.Name,
                 TimeZone = e.OriginalStartTimeZone,
                 ChangeType = changeType
