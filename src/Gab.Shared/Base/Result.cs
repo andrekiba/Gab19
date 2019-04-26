@@ -27,18 +27,19 @@ namespace Gab.Shared.Base
         }
 
         [DebuggerStepThrough]
+        [JsonConstructor]
         public ResultCommonLogic(bool isFailure, TError error)
         {
-            if (isFailure)
-            {
-                if (error == null)
-                    throw new ArgumentNullException(nameof(error), ResultMessages.ErrorObjectIsNotProvidedForFailure);
-            }
-            else
-            {
-                if (error != null)
-                    throw new ArgumentException(ResultMessages.ErrorObjectIsProvidedForSuccess, nameof(error));
-            }
+            //if (isFailure)
+            //{
+            //    if (error == null)
+            //        throw new ArgumentNullException(nameof(error), ResultMessages.ErrorObjectIsNotProvidedForFailure);
+            //}
+            //else
+            //{
+            //    if (error != null)
+            //        throw new ArgumentException(ResultMessages.ErrorObjectIsProvidedForSuccess, nameof(error));
+            //}
 
             IsFailure = isFailure;
             this.error = error;
@@ -60,20 +61,21 @@ namespace Gab.Shared.Base
         [DebuggerStepThrough]
         public static ResultCommonLogic Create(bool isFailure, string error)
         {
-            if (isFailure)
-            {
-                if (string.IsNullOrEmpty(error))
-                    throw new ArgumentNullException(nameof(error), ResultMessages.ErrorMessageIsNotProvidedForFailure);
-            }
-            else
-            {
-                if (error != null)
-                    throw new ArgumentException(ResultMessages.ErrorMessageIsProvidedForSuccess, nameof(error));
-            }
+            //if (isFailure)
+            //{
+            //    if (string.IsNullOrEmpty(error))
+            //        throw new ArgumentNullException(nameof(error), ResultMessages.ErrorMessageIsNotProvidedForFailure);
+            //}
+            //else
+            //{
+            //    if (error != null)
+            //        throw new ArgumentException(ResultMessages.ErrorMessageIsProvidedForSuccess, nameof(error));
+            //}
 
             return new ResultCommonLogic(isFailure, error);
         }
 
+        [JsonConstructor]
         public ResultCommonLogic(bool isFailure, string error) : base(isFailure, error)
         {
         }

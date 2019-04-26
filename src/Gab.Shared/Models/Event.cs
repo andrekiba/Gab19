@@ -18,6 +18,7 @@ namespace Gab.Shared.Models
         public string Organizer { get; set; }
         public string TimeZone { get; set; }
         public ChangeType ChangeType { get; set; } = ChangeType.None;
+        public string MeetingRoom { get; set; }
         [JsonIgnore]
         public bool IsCurrent { get; set; }
 
@@ -98,7 +99,7 @@ namespace Gab.Shared.Models
 
     public static class EventMappings
     {
-        public static Event ToEvent(this Microsoft.Graph.Event e, ChangeType changeType = ChangeType.None)
+        public static Event ToEvent(this Microsoft.Graph.Event e, ChangeType changeType = ChangeType.None, string meetingRoom = null)
         {
             var ev = new Event
             {
@@ -109,7 +110,8 @@ namespace Gab.Shared.Models
                 End = DateTime.Parse(e.End.DateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal).ToUniversalTime(),
                 Organizer = e.Organizer.EmailAddress.Name,
                 TimeZone = e.OriginalStartTimeZone,
-                ChangeType = changeType
+                ChangeType = changeType,
+                MeetingRoom = meetingRoom
             };
             return ev;
         }

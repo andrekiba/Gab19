@@ -165,4 +165,10 @@
   <data name="BookLabel" xml:space="preserve">
     <value>Book now</value>
   </data>
+  <data name="GenericErrorMessage" xml:space="preserve">
+    <value>We're sorry an error has occurred. Please contact the support team</value>
+  </data>
+  <data name="RoomItWillBeBusySoonMessage" xml:space="preserve">
+    <value>Room it will be busy soon!</value>
+  </data>
 </root>

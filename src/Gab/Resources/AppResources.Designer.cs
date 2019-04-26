@@ -115,6 +115,15 @@ namespace Gab.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to We&apos;re sorry an error has occurred. Please contact the support team.
+        /// </summary>
+        public static string GenericErrorMessage {
+            get {
+                return ResourceManager.GetString("GenericErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading....
         /// </summary>
         public static string LoadingMessage {
@@ -165,6 +174,15 @@ namespace Gab.Resources {
         public static string OperationTimeout {
             get {
                 return ResourceManager.GetString("OperationTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Room it will be busy soon!.
+        /// </summary>
+        public static string RoomItWillBeBusySoonMessage {
+            get {
+                return ResourceManager.GetString("RoomItWillBeBusySoonMessage", resourceCulture);
             }
         }
         

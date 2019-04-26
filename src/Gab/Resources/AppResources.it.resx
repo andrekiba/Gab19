@@ -165,4 +165,10 @@
   <data name="BookLabel" xml:space="preserve">
     <value>Prenota ora</value>
   </data>
+  <data name="GenericErrorMessage" xml:space="preserve">
+    <value>Siamo spiacenti, si è verificato un errore. Si prega di contattare il supporto tecnico</value>
+  </data>
+  <data name="RoomItWillBeBusySoonMessage" xml:space="preserve">
+    <value>La sala sarà occupata tra poco!</value>
+  </data>
 </root>

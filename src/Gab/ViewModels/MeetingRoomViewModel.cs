@@ -230,14 +230,19 @@ namespace Gab.ViewModels
             }
             else
             {
-                var result = await Do(async () => await mrService.CreateEvent(new CreateEvent
+                var createEvent = new CreateEvent
                 {
                     MeetingRoom = MeetingRoom,
                     TimeZone = CurrentTimeZone
-                }), AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteCreateEventCommand)}");
+                };
+
+                var result = await Do(async () => await mrService.CreateEvent(createEvent),
+                    AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteCreateEventCommand)}");
 
                 if (result.IsFailure)
                     await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
+                else
+                    Events.Add(result.Value.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
             }
         }
         async Task ExecuteEndsEventCommand()
@@ -270,6 +275,8 @@ namespace Gab.ViewModels
                 {
                     try
                     {
+                        if (e.MeetingRoom != MeetingRoom.Id)
+                            return;
                         switch (e.ChangeType)
                         {
                             case ChangeType.Created:

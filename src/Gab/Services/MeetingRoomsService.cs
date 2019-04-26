@@ -176,7 +176,7 @@ namespace Gab.Services
             return await BreakOrRetry(async () => await api.GetCalendarView(Constants.MeetingRoomsFuncKey, user, start.ToString("s"), end.ToString("s"), timeZone, GetCancellationToken()));
         }
 
-        public async Task<Result> CreateEvent(CreateEvent createEvent)
+        public async Task<Result<Event>> CreateEvent(CreateEvent createEvent)
         {
             //return await Task.FromResult(Result.Ok());
 

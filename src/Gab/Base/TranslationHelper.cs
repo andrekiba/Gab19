@@ -2,6 +2,7 @@
 using System.Resources;
 using Gab.Resources;
 using Gab.Shared.Base;
+using Gab.Shared.Messages;
 using Plugin.Multilingual;
 
 namespace Gab.Base
@@ -15,7 +16,7 @@ namespace Gab.Base
             var ci = CrossMultilingual.Current.CurrentCultureInfo;
 
             var translation = resmgr.Value.GetString(key, ci);
-            var genericErrorMessage = resmgr.Value.GetString("GenericErrorMessage", ci);
+            var genericErrorMessage = resmgr.Value.GetString(ErrorMessages.GenericErrorMessage, ci);
 
             return !translation.IsNullOrWhiteSpace() ? translation : genericErrorMessage;
         }

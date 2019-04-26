@@ -14,7 +14,7 @@ namespace Gab.Services
 
         Task<Result<List<MeetingRoom>>> GetMeetingRooms();
         Task<Result<List<Event>>> GetCalendarView(string user, DateTime start, DateTime end, string timeZone = null);
-        Task<Result> CreateEvent(CreateEvent createEvent);
+        Task<Result<Event>> CreateEvent(CreateEvent createEvent);
         Task<Result> EndsEvent(EndsEvent endsEvent);
         Task<Result> Subscribe(CreateSubscription createSubscription);
 

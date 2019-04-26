@@ -101,7 +101,7 @@ namespace Gab.Functions
 
                 var result = await graphClient.Users[user].CalendarView.Request(options).GetAsync();
 
-                var events = result.Select(e => e.ToEvent()).ToList();
+                var events = result.Select(e => e.ToEvent(ChangeType.None, user)).ToList();
 
                 return new OkObjectResult(Result.Ok(events));
             }
@@ -141,7 +141,7 @@ namespace Gab.Functions
                 dynamic result = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync());
 
                 if (result.value.First.availabilityView != "0")
-                    return new OkObjectResult(Result.Fail("Room is busy!"));
+                    return new OkObjectResult(Result.Fail<Event>(ErrorMessages.RoomItWillBeBusySoonMessage));
 
                 var startTime = new DateTimeTimeZone
                 {
@@ -156,20 +156,19 @@ namespace Gab.Functions
 
                 var createdEvent = await graphClient.Users[input.MeetingRoom.Mail].Events.Request().AddAsync(new Microsoft.Graph.Event
                 {
-                    //Subject = $"Event{Guid.NewGuid().ToString().Substring(0, 8)}",
                     Subject = $"Prenotazione Manuale {input.MeetingRoom.Name}",
                     BodyPreview =$"Prenotazione Manuale {input.MeetingRoom.Name}",
                     Start = startTime,
                     End = endTime
                 });
 
-                return new OkObjectResult(Result.Ok());
+                return new OkObjectResult(Result.Ok(createdEvent.ToEvent(ChangeType.Created, input.MeetingRoom.Id)));
             }
             catch (Exception e)
             {
                 var error = $"{e.Message}\n\r{e.StackTrace}";
                 log.Error(error);
-                return new OkObjectResult(Result.Fail(error));
+                return new OkObjectResult(Result.Fail<Event>(error));
             }
         }
 
@@ -242,13 +241,14 @@ namespace Gab.Functions
                 if (existingSub != null)
                 {
                     await graphClient.Subscriptions[existingSub.Id].Request().DeleteAsync();
-                    var deleteOperation = TableOperation.Delete(new SubscriptionEntity
+
+                    var retrieve = TableOperation.Retrieve<SubscriptionEntity>("SUBSCRIPTION", existingSub.Id);
+                    var sub = (await subTable.ExecuteAsync(retrieve)).Result;
+                    if (sub != null)
                     {
-                        PartitionKey = "SUBSCRIPTION",
-                        RowKey = existingSub.Id,
-                        ETag = "*"
-                    });
-                    await subTable.ExecuteAsync(deleteOperation);
+                        var deleteOperation = TableOperation.Delete((SubscriptionEntity)sub);
+                        await subTable.ExecuteAsync(deleteOperation);
+                    }
                 }
 
                 var createdSub = await graphClient.Subscriptions.Request().AddAsync(subscription);
@@ -367,7 +367,7 @@ namespace Gab.Functions
                 if (changeType != ChangeType.Deleted)
                 {
                     var graphEvent = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
-                    ev = graphEvent.ToEvent(changeType);
+                    ev = graphEvent.ToEvent(changeType, user);
                 }
                 else
                 {
@@ -407,7 +407,7 @@ namespace Gab.Functions
                 if (changeType != ChangeType.Deleted)
                 {
                     var graphEvent = await graphClient.Users[user].Events[notification.Resource.Id].Request().GetAsync();
-                    ev = graphEvent.ToEvent(changeType);
+                    ev = graphEvent.ToEvent(changeType, user);
                 }
                 else
                 {

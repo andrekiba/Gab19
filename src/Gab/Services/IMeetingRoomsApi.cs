@@ -18,7 +18,7 @@ namespace Gab.Services
         Task<Result<List<Event>>> GetCalendarView([Header("x-functions-key")]string funcKey, string user, string start, string end, string timeZone, CancellationToken cancellationToken);
 
         [Post("/event")]
-        Task<Result> CreateEvent([Header("x-functions-key")]string funcKey, [Body]CreateEvent createEvent, CancellationToken cancellationToken);
+        Task<Result<Event>> CreateEvent([Header("x-functions-key")]string funcKey, [Body]CreateEvent createEvent, CancellationToken cancellationToken);
 
         [Post("/event/ends")]
         Task<Result> EndsEvent([Header("x-functions-key")]string funcKey, [Body]EndsEvent endsEvent, CancellationToken cancellationToken);
