@@ -10,7 +10,7 @@ using Xamarin.Forms;
 
 namespace Gab.Droid
 {
-    [Activity(Label = "Gab19", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "Gab19", Icon = "@mipmap/icon", Theme = "@style/GabTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -33,7 +33,6 @@ namespace Gab.Droid
             Forms.Init(this, savedInstanceState);
             Plugin.Iconize.Iconize.Init(Resource.Id.toolbar, Resource.Id.sliding_tabs);
             ImageCircleRenderer.Init();
-            Plugin.Iconize.Iconize.Init(Resource.Id.toolbar, Resource.Id.sliding_tabs);
             FormsControls.Droid.Main.Init(this);
             LoadApplication(new App());
         }

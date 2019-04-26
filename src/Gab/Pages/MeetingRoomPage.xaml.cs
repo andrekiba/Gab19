@@ -15,10 +15,25 @@ namespace Gab.Pages
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MeetingRoomPage : ContentPage, IAnimationPage
     {
+        #region Fields
+
+        double width = 0;
+        double height = 0;
+
+        #endregion
+
+        #region Properties
+
         public SfListView EventListView;
+
+        #endregion
+
+
         public MeetingRoomPage()
         {
             InitializeComponent();
+
+            SizeChanged += OnSizeChanged;
 
             EventListView = EventList;
 
@@ -57,6 +72,66 @@ namespace Gab.Pages
                 },
                 Comparer = new GroupComparer()
             });
+        }
+
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height); //must be called
+            if (this.width != width || this.height != height)
+            {
+                this.width = width;
+                this.height = height;
+                //reconfigure layout
+
+                //portrait
+                if (this.height > this.width)
+                {
+                    ContentLayout.Direction = FlexDirection.Column;
+
+                    BookedLayout.Padding = new Thickness(0,10,0,10);
+                    FreeLayout.Padding = new Thickness(0,10,0,10);
+
+                    HeaderLayout.HeightRequest = 50;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        FlexLayout.SetGrow(BookedLayout, 0.6f);
+                        FlexLayout.SetGrow(FreeLayout, 0.6f);
+                        FlexLayout.SetGrow(PullToRefresh, 1);
+                    }
+                    else
+                    {
+                        FlexLayout.SetGrow(BookedLayout, 0.8f);
+                        FlexLayout.SetGrow(FreeLayout, 0.8f);
+                        FlexLayout.SetGrow(PullToRefresh, 1);
+                    }                
+                }
+                else
+                {
+                    ContentLayout.Direction = FlexDirection.Row;
+
+                    HeaderLayout.HeightRequest = 40;
+
+                    BookedLayout.Padding = new Thickness(0,10,0,10);
+                    FreeLayout.Padding = new Thickness(0,10,0,10);
+
+                    FlexLayout.SetGrow(BookedLayout, 1);
+                    FlexLayout.SetGrow(FreeLayout, 1);
+                    FlexLayout.SetGrow(PullToRefresh, 1f);
+                }
+            }
+        }
+
+        void OnSizeChanged(object sender, EventArgs e)
+        {
+            if (Height > Width)
+            {
+
+            }
+            else
+            {
+
+            }
         }
 
         void PullToRefresh_OnRefreshing(object sender, EventArgs e)

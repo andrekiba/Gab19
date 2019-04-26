@@ -7,8 +7,13 @@
              x:Name="EventCellName"
              x:Class="Gab.Cells.EventCell">
 
-    <Grid Padding="10" ColumnSpacing="10">
-
+    <Grid ColumnSpacing="10">
+        <Grid.Padding>
+            <OnIdiom x:TypeArguments="Thickness">
+                <OnIdiom.Phone>10</OnIdiom.Phone>
+                <OnIdiom.Tablet>20,10</OnIdiom.Tablet>
+            </OnIdiom>
+        </Grid.Padding>
         <Grid.Resources>
             <ResourceDictionary>
                 <converters:BookedToColorConverter x:Key="BookedToColorConverter" />

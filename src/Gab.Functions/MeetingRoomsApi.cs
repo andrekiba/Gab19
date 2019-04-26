@@ -434,7 +434,29 @@ namespace Gab.Functions
         }
 
         [FunctionName("HubInfo")]
-        public SignalRConnectionInfo HubInfo(
+        public IActionResult HubInfo(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "hubInfo")] HttpRequest req,
+            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
+        {
+            try
+            {
+                var connection = new SignalRConnection
+                {
+                    Url = connectionInfo.Url,
+                    AccessToken = connectionInfo.AccessToken
+                };
+                return new OkObjectResult(Result.Ok(connection));
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return new OkObjectResult(Result.Fail<List<MeetingRoom>>(error));
+            }
+        }
+
+        [FunctionName("Negotiate")]
+        public SignalRConnectionInfo Negotiate(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
             [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
         {

@@ -162,7 +162,7 @@ namespace Gab.ViewModels
 
             var startHub = await mrService.ConfigureHub()
                 .OnSuccess(() => mrService.ConnectHub())
-                .OnSuccess(SubscribeToHub);
+                .OnSuccess(() => SubscribeToHub());
 
             if (startHub.IsFailure)
                 return startHub;

@@ -19,7 +19,7 @@ namespace Gab.Base.Navigation
             if (Device.RuntimePlatform != Device.Android)
                 return;
 
-            BarBackgroundColor = (Color)Application.Current.Resources["ColorPrimary"];
+            BarBackgroundColor = (Color)Application.Current.Resources["GrayBlack"];
             BarTextColor = Color.White;
         }
 
@@ -31,7 +31,7 @@ namespace Gab.Base.Navigation
             if (Device.RuntimePlatform != Device.Android)
                 return;
 
-            BarBackgroundColor = (Color)Application.Current.Resources["ColorPrimary"];
+            BarBackgroundColor = (Color)Application.Current.Resources["GrayBlack"];
             BarTextColor = Color.White;
         }
 

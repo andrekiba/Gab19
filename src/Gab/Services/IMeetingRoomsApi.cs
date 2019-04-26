@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Gab.Shared.Base;
 using Gab.Shared.Models;
-using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Refit;
 
 namespace Gab.Services
@@ -23,8 +22,8 @@ namespace Gab.Services
         [Post("/event/ends")]
         Task<Result> EndsEvent([Header("x-functions-key")]string funcKey, [Body]EndsEvent endsEvent, CancellationToken cancellationToken);
 
-        [Post("/negotiate")]
-        Task<Result<SignalRConnectionInfo>> GetHubInfo([Header("x-functions-key")]string funcKey, CancellationToken cancellationToken);
+        [Get("/hubInfo")]
+        Task<Result<SignalRConnection>> GetHubInfo([Header("x-functions-key")]string funcKey, CancellationToken cancellationToken);
 
         [Post("/subscribe")]
         Task<Result> Subscribe([Header("x-functions-key")]string funcKey, [Body]CreateSubscription createSubscription, CancellationToken cancellationToken);

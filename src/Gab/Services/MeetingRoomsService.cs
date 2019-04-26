@@ -13,7 +13,6 @@ using Gab.Shared.Base;
 using Gab.Shared.Messages;
 using Gab.Shared.Models;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Newtonsoft.Json;
 using Polly;
 using Polly.CircuitBreaker;
@@ -197,7 +196,7 @@ namespace Gab.Services
             return await BreakOrRetry(async () => await api.Subscribe(Constants.MeetingRoomsFuncKey, createSubscription, GetCancellationToken()));
         }
 
-        public async Task<Result<SignalRConnectionInfo>> GetHubInfo()
+        public async Task<Result<SignalRConnection>> GetHubInfo()
         {
             //var connectionInfo = new SignalRConnectionInfo
             //{
