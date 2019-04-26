@@ -92,7 +92,7 @@ namespace Gab.Shared.Models
     public class EndsEvent
     {
         public string Id { get; set; }
-        public DateTime Ended { get; set; }
+        public string Ended { get; set; }
         public MeetingRoom MeetingRoom { get; set; }
         public string TimeZone { get; set; }
     }

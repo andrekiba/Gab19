@@ -253,13 +253,16 @@ namespace Gab.ViewModels
             }
             else
             {
-                var result = await Do(async () => await mrService.EndsEvent(new EndsEvent
+                var ev = new EndsEvent
                 {
                     Id = CurrentEvent.Id,
                     MeetingRoom = MeetingRoom,
-                    Ended = DateTime.Now,
+                    Ended = DateTime.Now.ToString("s"),
                     TimeZone = CurrentTimeZone
-                }), AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteEndsEventCommand)}");
+                };
+
+                var result = await Do(async () => await mrService.EndsEvent(ev), 
+                    AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteEndsEventCommand)}");
 
                 if (result.IsFailure)
                     await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);

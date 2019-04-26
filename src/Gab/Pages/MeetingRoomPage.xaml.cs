@@ -33,8 +33,6 @@ namespace Gab.Pages
         {
             InitializeComponent();
 
-            SizeChanged += OnSizeChanged;
-
             EventListView = EventList;
 
             EventList.ItemTapped += (sender, e) =>
@@ -81,15 +79,14 @@ namespace Gab.Pages
             {
                 this.width = width;
                 this.height = height;
-                //reconfigure layout
 
                 //portrait
                 if (this.height > this.width)
                 {
                     ContentLayout.Direction = FlexDirection.Column;
 
-                    BookedLayout.Padding = new Thickness(0,10,0,10);
-                    FreeLayout.Padding = new Thickness(0,10,0,10);
+                    BookedLayout.Padding = new Thickness(0,10,0,5);
+                    FreeLayout.Padding = new Thickness(0,10,0,5);
 
                     HeaderLayout.HeightRequest = 50;
 
@@ -119,18 +116,6 @@ namespace Gab.Pages
                     FlexLayout.SetGrow(FreeLayout, 1);
                     FlexLayout.SetGrow(PullToRefresh, 1f);
                 }
-            }
-        }
-
-        void OnSizeChanged(object sender, EventArgs e)
-        {
-            if (Height > Width)
-            {
-
-            }
-            else
-            {
-
             }
         }
 

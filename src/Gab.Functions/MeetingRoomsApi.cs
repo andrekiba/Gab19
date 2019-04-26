@@ -186,14 +186,19 @@ namespace Gab.Functions
 
                 var endTime = new DateTimeTimeZone
                 {
-                    DateTime = input.Ended.ToString("s"),
+                    DateTime = input.Ended,
                     TimeZone = timeZone
                 };
 
-                await graphClient.Users[input.MeetingRoom.Mail].Events[input.Id].Request().UpdateAsync(new Microsoft.Graph.Event
+                //var ev = await graphClient.Users[input.MeetingRoom.Mail].Events[input.Id].Request().GetAsync();
+                //ev.End = endTime;
+
+                var ev = new Microsoft.Graph.Event
                 {
                     End = endTime
-                });
+                };
+
+                await graphClient.Users[input.MeetingRoom.Mail].Events[input.Id].Request().UpdateAsync(ev);
 
                 return new OkObjectResult(Result.Ok());
             }
