@@ -28,7 +28,6 @@ namespace Gab.Pages
 
         #endregion
 
-
         public MeetingRoomPage()
         {
             InitializeComponent();
@@ -41,35 +40,46 @@ namespace Gab.Pages
                     EventList.SelectedItem = null;
             };
 
-            EventList.DataSource.GroupDescriptors.Add(new GroupDescriptor
-            {
-                PropertyName = "Start",
-                KeySelector = obj =>
-                {
-                    var ev = (Event)obj;
-                    var key = new DateTimeGroupKey();
-                    var date = ev.Start.Date;
+            SortAndGroupEventList();
+        }
 
-                    if (date == DateTime.Today)
+        public void SortAndGroupEventList()
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                EventList.DataSource.SortDescriptors.Clear();
+                EventList.DataSource.GroupDescriptors.Clear();
+                EventList.DataSource.SortDescriptors.Add(new SortDescriptor { PropertyName = "Start", Direction = ListSortDirection.Ascending });
+                EventList.DataSource.GroupDescriptors.Add(new GroupDescriptor
+                {
+                    PropertyName = "Start",
+                    KeySelector = obj =>
                     {
-                        key.Name = AppResources.TodayLabel;
-                        key.Value = 0;
-                    }
-                    else if (date == DateTime.Today.AddDays(1))
-                    {
-                        key.Name = $"{AppResources.TomorrowLabel}  {ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo)}";
-                        key.Value = 1;
-                    }
-                    else
-                    {
-                        key.Name = ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo);
-                        key.Value = 2;
-                    }
-                    key.DateTime = date;                   
-                    return key;
-                },
-                Comparer = new GroupComparer()
-            });
+                        var ev = (Event)obj;
+                        var key = new DateTimeGroupKey();
+                        var date = ev.Start.Date;
+
+                        if (date == DateTime.Today)
+                        {
+                            key.Name = AppResources.TodayLabel;
+                            key.Value = 0;
+                        }
+                        else if (date == DateTime.Today.AddDays(1))
+                        {
+                            key.Name = $"{AppResources.TomorrowLabel}  {ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo)}";
+                            key.Value = 1;
+                        }
+                        else
+                        {
+                            key.Name = ev.Start.ToString("dddd, dd MMMM", CrossMultilingual.Current.CurrentCultureInfo);
+                            key.Value = 2;
+                        }
+                        key.DateTime = date;
+                        return key;
+                    },
+                    Comparer = new GroupComparer()
+                });
+            });          
         }
 
         protected override void OnSizeAllocated(double width, double height)

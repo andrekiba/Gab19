@@ -178,13 +178,6 @@
                            ItemSize="100"
                            ItemSpacing="0"
                            Padding="0">
-                        <lv:SfListView.DataSource>
-                            <ds:DataSource>
-                                <ds:DataSource.SortDescriptors>
-                                    <ds:SortDescriptor PropertyName="Start" Direction="Ascending"/>
-                                </ds:DataSource.SortDescriptors>
-                            </ds:DataSource>
-                        </lv:SfListView.DataSource>
                         <lv:SfListView.ItemTemplate>
                             <DataTemplate>
                                 <cells:EventCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomPageName}}"/>

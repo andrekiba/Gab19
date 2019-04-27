@@ -15,6 +15,7 @@ using Gab.Shared.Models;
 using MvvmHelpers;
 using Plugin.Connectivity;
 using PropertyChanged;
+using Syncfusion.DataSource;
 using Xamarin.Forms;
 using ScrollToPosition = Syncfusion.ListView.XForms.ScrollToPosition;
 
@@ -52,7 +53,8 @@ namespace Gab.ViewModels
         [DependsOn(nameof(CurrentEvent))]
         public double CurrentEventProgress => CurrentEvent != null ? (DateTime.Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuraion : 0;
 
-        public Color MeetingRoomColor => MeetingRoom != null ? Color.FromHex(MeetingRoom.Color) : (Color)Application.Current.Resources["GrayDark"];
+        public Color MeetingRoomColor => MeetingRoom != null && !MeetingRoom.Color.IsNullOrWhiteSpace() ? 
+            Color.FromHex(MeetingRoom.Color) : (Color)Application.Current.Resources["GrayDark"];
         public Color FreeColor => (Color)Application.Current.Resources["LightGreen"];
         public Color FreeDarkColor => FreeColor.Darker();
         public Color BookedColor => (Color)Application.Current.Resources["LightRed"];
@@ -162,7 +164,7 @@ namespace Gab.ViewModels
 
             var startHub = await mrService.ConfigureHub()
                 .OnSuccess(() => mrService.ConnectHub())
-                .OnSuccess(() => SubscribeToHub());
+                .OnSuccess(SubscribeToHub);
 
             if (startHub.IsFailure)
                 return startHub;
@@ -171,7 +173,6 @@ namespace Gab.ViewModels
 
             return addToGroup.IsFailure ? addToGroup : Result.Ok();
         }
-
         void SetCurrentEvent()
         {
             var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
@@ -212,6 +213,7 @@ namespace Gab.ViewModels
                         {
                             var convEvents = events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
                             Events.ReplaceRange(convEvents);
+                            ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
                         });
 
                 }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
@@ -242,7 +244,10 @@ namespace Gab.ViewModels
                 if (result.IsFailure)
                     await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
                 else
+                {
                     Events.Add(result.Value.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
+                    ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
+                }                  
             }
         }
         async Task ExecuteEndsEventCommand()
@@ -278,14 +283,21 @@ namespace Gab.ViewModels
                 {
                     try
                     {
+                        var ev = Events.SingleOrDefault(x => x.Id == e.Id);
+
+                        //other meeting room or meeting room has changed
                         if (e.MeetingRoom != MeetingRoom.Id)
+                        {                            
+                            if (ev != null)
+                                Events.Remove(ev);
                             return;
+                        }
+                        
                         switch (e.ChangeType)
                         {
                             case ChangeType.Created:
                             case ChangeType.Updated:
                                 e.ConvertTimeToTimeZone(CurrentXamarinTimeZone);
-                                var ev = Events.SingleOrDefault(x => x.Id == e.Id);
                                 if (ev != null)
                                 {
                                     ev.Update(e);
@@ -302,6 +314,8 @@ namespace Gab.ViewModels
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
+
+                        ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
                     }
                     catch (Exception ex)
                     {
