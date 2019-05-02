@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cells="clr-namespace:Gab.Cells;assembly=Gab"
+             xmlns:lv="clr-namespace:Syncfusion.ListView.XForms;assembly=Syncfusion.SfListView.XForms"
+             xmlns:ptr="clr-namespace:Syncfusion.SfPullToRefresh.XForms;assembly=Syncfusion.SfPullToRefresh.XForms"
+             xmlns:ds="clr-namespace:Syncfusion.DataSource;assembly=Syncfusion.DataSource.Portable"
+             x:Class="Gab.Pages.MeetingRoomsPage"
+             x:Name="MeetingRoomsPageName"
+             Title="{Binding Resources[MeetingRoomsLabel]}">
+
+    <ptr:SfPullToRefresh x:Name="PullToRefresh"
+                         ProgressBackgroundColor="{StaticResource Teal}" ProgressStrokeColor="White"
+                         RefreshContentHeight="50" RefreshContentWidth="50" TransitionMode="SlideOnTop"
+                         IsRefreshing="{Binding IsRefreshing}" Refreshing="PullToRefresh_OnRefreshing">
+        <ptr:SfPullToRefresh.PullableContent>
+            <lv:SfListView x:Name="MeetingRoomList"
+                           VerticalOptions="Fill"
+                           HorizontalOptions="Fill"
+                           ItemsSource="{Binding MeetingRooms}"                          
+                           SelectionMode="None"                            
+                           ItemSize="70"
+                           ItemSpacing="0"
+                           TapCommand="{Binding MeetingRoomCommand}">
+                <lv:SfListView.DataSource>
+                    <ds:DataSource>
+                        <ds:DataSource.SortDescriptors>
+                            <ds:SortDescriptor PropertyName="Name" Direction="Ascending"/>
+                        </ds:DataSource.SortDescriptors>
+                    </ds:DataSource>
+                </lv:SfListView.DataSource>
+                <lv:SfListView.ItemTemplate>
+                    <DataTemplate>
+                        <cells:MeetingRoomCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomsPageName}}"/>
+                    </DataTemplate>
+                </lv:SfListView.ItemTemplate>
+            </lv:SfListView>
+        </ptr:SfPullToRefresh.PullableContent>
+    </ptr:SfPullToRefresh>
+
+</ContentPage>

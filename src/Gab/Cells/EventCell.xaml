@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<cells:BaseCell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cells="clr-namespace:Gab.Cells;assembly=Gab"
+             xmlns:iconize="clr-namespace:Plugin.Iconize;assembly=Plugin.Iconize"
+             xmlns:converters="clr-namespace:Gab.Converters;assembly=Gab"
+             x:Name="EventCellName"
+             x:Class="Gab.Cells.EventCell">
+
+    <Grid ColumnSpacing="10">
+        <Grid.Padding>
+            <OnIdiom x:TypeArguments="Thickness">
+                <OnIdiom.Phone>10</OnIdiom.Phone>
+                <OnIdiom.Tablet>20,10</OnIdiom.Tablet>
+            </OnIdiom>
+        </Grid.Padding>
+        <Grid.Resources>
+            <ResourceDictionary>
+                <converters:BookedToColorConverter x:Key="BookedToColorConverter" />
+                <converters:NullToBoolConverter x:Key="NullToBoolConverter" />
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="60"/>
+        </Grid.ColumnDefinitions>
+
+        <StackLayout Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalOptions="StartAndExpand" Spacing="10">
+            <Label Text="{Binding Start, StringFormat='{}{0:HH:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
+            <iconize:IconLabel Text="fas-arrow-right" FontSize="15" VerticalOptions="Center" VerticalTextAlignment="Center" />
+            <Label Text="{Binding End, StringFormat='{}{0:HH:mm}'}" VerticalOptions="Center" VerticalTextAlignment="Center"/>
+        </StackLayout>
+        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Subject}" FontAttributes="Bold" FontSize="Large"
+               TextColor="{Binding IsCurrent, Converter={StaticResource BookedToColorConverter}}"
+               VerticalOptions="Center" VerticalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="0" Text="{Binding Organizer}"
+               VerticalOptions="Center" VerticalTextAlignment="Center"/>
+
+        <iconize:IconLabel Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Text="fas-times-circle" FontSize="30"
+                           IsVisible="{Binding IsCurrent}"
+                           TextColor="{Binding Path=ParentBindingContext.BookedColor, Source={x:Reference EventCellName}}"
+                           HorizontalOptions="Center" VerticalTextAlignment="Center">
+            <iconize:IconLabel.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Path=ParentBindingContext.EndsEventCommand, Source={x:Reference EventCellName}}"/>
+            </iconize:IconLabel.GestureRecognizers>
+        </iconize:IconLabel>
+
+    </Grid>
+
+</cells:BaseCell>
