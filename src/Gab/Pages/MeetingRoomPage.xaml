@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:lv="clr-namespace:Syncfusion.ListView.XForms;assembly=Syncfusion.SfListView.XForms"
@@ -26,7 +26,7 @@
                 <Label.FontSize>
                     <OnIdiom x:TypeArguments="x:Double">
                         <OnIdiom.Phone>25</OnIdiom.Phone>
-                        <OnIdiom.Tablet>35</OnIdiom.Tablet>
+                        <OnIdiom.Tablet>30</OnIdiom.Tablet>
                     </OnIdiom>
                 </Label.FontSize>
             </Label>
@@ -43,8 +43,7 @@
             <FlexLayout x:Name="FreeLayout" IsVisible="{Binding Booked, Converter={StaticResource InverseBoolConverter}}"
                         BackgroundColor="{Binding FreeColor}"
                         Direction="Column" AlignItems="Center"
-                        JustifyContent="SpaceBetween"
-                        FlexLayout.Grow="1">
+                        JustifyContent="SpaceBetween">
               
                 <StackLayout Spacing="5">
                     <Label Text="{Binding Now, StringFormat='{}{0:HH:mm dddd, dd MMMM}'}"
@@ -108,8 +107,7 @@
             <FlexLayout x:Name="BookedLayout" IsVisible="{Binding Booked}"
                         BackgroundColor="{Binding BookedColor}"
                         Direction="Column" AlignItems="Center"
-                        JustifyContent="SpaceBetween"
-                        FlexLayout.Grow="1">
+                        JustifyContent="SpaceBetween">
 
                 <StackLayout Spacing="5">
                     <Label Text="{Binding Now, StringFormat='{}{0:hh\\:mm dddd, MMMM dd}'}"
@@ -164,8 +162,7 @@
             <ptr:SfPullToRefresh x:Name="PullToRefresh"
                          ProgressBackgroundColor="{StaticResource Teal}" ProgressStrokeColor="White"
                          RefreshContentHeight="50" RefreshContentWidth="50" TransitionMode="SlideOnTop"
-                         IsRefreshing="{Binding IsRefreshing}" Refreshing="PullToRefresh_OnRefreshing"
-                         FlexLayout.Grow=".8">
+                         IsRefreshing="{Binding IsRefreshing}" Refreshing="PullToRefresh_OnRefreshing">
                 <ptr:SfPullToRefresh.PullableContent>
                     <lv:SfListView x:Name="EventList"
                            VerticalOptions="Fill"
@@ -203,122 +200,5 @@
         </FlexLayout>
 
     </FlexLayout>
-
-    <!--<Grid RowSpacing="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="2.5*"/>
-        </Grid.RowDefinitions>
-
-        <Grid Grid.Row="0" Padding="10" BackgroundColor="{Binding MeetingRoomColor}">
-            <Label Text="{Binding MeetingRoom.Name}" TextColor="White" FontAttributes="Bold" FontSize="Large"
-                   VerticalOptions="Center" />
-        </Grid>
-
-        <Grid Grid.Row="1" x:Name="Free" IsVisible="{Binding Booked, Converter={StaticResource InverseBoolConverter}}" BackgroundColor="{Binding FreeColor}"
-              Padding="10" RowSpacing="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <StackLayout Grid.Row="0" Spacing="5">
-                <Label Text="{Binding Now, StringFormat='{}{0:HH:mm dddd, dd MMMM}'}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Start"/>
-                <Label Text="{Binding Resources[FreeLabel]}" TextColor="White" FontSize="Large" FontAttributes="Bold" 
-                       HorizontalOptions="Center" VerticalOptions="Center"/>
-            </StackLayout>
-           
-            <Grid Grid.Row="1">
-                <ci:CircleImage WidthRequest="70" HeightRequest="70"
-                                VerticalOptions="CenterAndExpand" HorizontalOptions="Center"
-                                FillColor="{Binding FreeDarkColor}" BorderColor="Transparent" BorderThickness="0">
-                </ci:CircleImage>
-                <iconize:IconLabel Text="fas-plus" FontSize="35" TextColor="White"
-                                   VerticalOptions="CenterAndExpand" HorizontalOptions="Center"/>
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding CreateEventCommand}"/>
-                </Grid.GestureRecognizers>
-            </Grid>
-            
-            <Label Grid.Row="2" Text="{Binding Resources[BookLabel]}" HorizontalOptions="Center" VerticalOptions="End"
-                   TextColor="White"/>
-        </Grid>
-            
-        <Grid Grid.Row="1" x:Name="Booked" IsVisible="{Binding Booked}" BackgroundColor="{Binding BookedColor}"
-              Padding="10" RowSpacing="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <StackLayout Grid.Row="0" Spacing="5">
-                <Label Text="{Binding Now, StringFormat='{}{0:hh\\:mm dddd, MMMM dd}'}" TextColor="White" HorizontalOptions="Center" VerticalOptions="Start"/>
-                <Label Text="{Binding Resources[BookedLabel]}" TextColor="White" FontSize="Large" FontAttributes="Bold" 
-                       HorizontalOptions="Center" VerticalOptions="Center"/>
-            </StackLayout>
-            
-            <Grid Grid.Row="1">
-                <pb:SfCircularProgressBar IsIndeterminate="False" ShowProgressValue="False"
-                                          TrackColor="{Binding BookedDarkColor}" ProgressColor="White"
-                                          Minimum="0" Maximum="100"
-                                          Progress="{Binding CurrentEventProgress}" AnimationDuration="{Binding CurrentEventDuration}"
-                                          IndicatorOuterRadius="1" IndicatorInnerRadius="0.9"
-                                          TrackOuterRadius="1" TrackInnerRadius=".9"
-                                          VerticalOptions="Center" Margin="0"
-                                          HeightRequest="70" WidthRequest="70">
-                    <pb:SfCircularProgressBar.Content>
-                        <iconize:IconLabel Text="fas-check" FontSize="35" TextColor="White"
-                                           VerticalOptions="CenterAndExpand" HorizontalOptions="Center"/>
-                    </pb:SfCircularProgressBar.Content>
-                </pb:SfCircularProgressBar>
-            </Grid>
-            
-            <Label Grid.Row="2" Text="{Binding CurrentEvent.Subject}" LineBreakMode="TailTruncation"
-                   HorizontalOptions="Center" VerticalOptions="End"
-                   TextColor="White"/>
-        </Grid>
-
-        <ptr:SfPullToRefresh x:Name="PullToRefresh" Grid.Row="2"
-                         ProgressBackgroundColor="{StaticResource Teal}" ProgressStrokeColor="White"
-                         RefreshContentHeight="50" RefreshContentWidth="50" TransitionMode="SlideOnTop"
-                         IsRefreshing="{Binding IsRefreshing}" Refreshing="PullToRefresh_OnRefreshing">
-            <ptr:SfPullToRefresh.PullableContent>
-                <lv:SfListView x:Name="EventList"
-                           VerticalOptions="Fill"
-                           HorizontalOptions="Fill"
-                           ItemsSource="{Binding Events}"                          
-                           SelectionMode="None"
-                           IsStickyGroupHeader="True"
-                           AllowGroupExpandCollapse="True"
-                           AutoFitMode="Height"                          
-                           ItemSize="100"
-                           ItemSpacing="0"
-                           Padding="0">
-                    <lv:SfListView.DataSource>
-                        <ds:DataSource>
-                            <ds:DataSource.SortDescriptors>
-                                <ds:SortDescriptor PropertyName="Start" Direction="Ascending"/>
-                            </ds:DataSource.SortDescriptors>
-                        </ds:DataSource>
-                    </lv:SfListView.DataSource>
-                    <lv:SfListView.ItemTemplate>
-                        <DataTemplate>
-                            <cells:EventCell ParentBindingContext="{Binding Path=BindingContext, Source={x:Reference MeetingRoomPageName}}"/>
-                        </DataTemplate>
-                    </lv:SfListView.ItemTemplate>
-                    <lv:SfListView.GroupHeaderTemplate>
-                        <DataTemplate>
-                            <Grid BackgroundColor="{StaticResource GrayLight}" Padding="10,5,10,5">
-                                <Label Text="{Binding Key.Name}" VerticalOptions="Center" />
-                            </Grid>
-                        </DataTemplate>
-                    </lv:SfListView.GroupHeaderTemplate>
-                </lv:SfListView>
-            </ptr:SfPullToRefresh.PullableContent>
-        </ptr:SfPullToRefresh>
-
-    </Grid>-->
+    
 </ContentPage>

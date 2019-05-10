@@ -85,7 +85,7 @@ namespace Gab.ViewModels
             {
                 await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
             }
-            else 
+            else
             {
                 IsRefreshing = true;
 
@@ -94,8 +94,8 @@ namespace Gab.ViewModels
                     return await mrService.GetMeetingRooms()
                         .OnFailure(error => MeetingRooms.Clear())
                         .OnSuccess(mrs => MeetingRooms.ReplaceRange(mrs));
-                    
-                }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
+
+                }, caller: $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
 
                 IsRefreshing = false;
 

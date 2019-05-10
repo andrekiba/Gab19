@@ -36,7 +36,7 @@ namespace Gab.ViewModels
 
         #region Properties
 
-        public ObservableRangeCollection<Event> Events { get; set; } = new ObservableRangeCollection<Event>();     
+        public ObservableRangeCollection<Event> Events { get; set; } = new ObservableRangeCollection<Event>();
         public MeetingRoom MeetingRoom { get; private set; }
         public bool IsRefreshing { get; set; }
 
@@ -48,12 +48,12 @@ namespace Gab.ViewModels
         public bool Booked => CurrentEvent != null;
 
         [DependsOn(nameof(CurrentEvent))]
-        public int CurrentEventDuraion => CurrentEvent != null ? (int)(CurrentEvent.End - CurrentEvent.Start).TotalSeconds : 0;
+        public int CurrentEventDuration => CurrentEvent != null ? (int)(CurrentEvent.End - CurrentEvent.Start).TotalSeconds : 0;
 
-        [DependsOn(nameof(CurrentEvent))]
-        public double CurrentEventProgress => CurrentEvent != null ? (DateTime.Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuraion : 0;
+        [DependsOn(nameof(CurrentEvent), nameof(Now))]
+        public double CurrentEventProgress => CurrentEvent != null ? (Now - CurrentEvent.Start).TotalSeconds * 100 / CurrentEventDuration : 0;
 
-        public Color MeetingRoomColor => MeetingRoom != null && !MeetingRoom.Color.IsNullOrWhiteSpace() ? 
+        public Color MeetingRoomColor => MeetingRoom != null && !MeetingRoom.Color.IsNullOrWhiteSpace() ?
             Color.FromHex(MeetingRoom.Color) : (Color)Application.Current.Resources["GrayDark"];
         public Color FreeColor => (Color)Application.Current.Resources["LightGreen"];
         public Color FreeDarkColor => FreeColor.Darker();
@@ -66,7 +66,7 @@ namespace Gab.ViewModels
 
         public MeetingRoomViewModel(IMeetingRoomsService mrService)
         {
-            this.mrService = mrService;            
+            this.mrService = mrService;
         }
 
         public override void Init(object initData)
@@ -98,7 +98,7 @@ namespace Gab.ViewModels
         protected override async void ViewIsDisappearing(object sender, EventArgs e)
         {
             base.ViewIsDisappearing(sender, e);
-            
+
             //timeTimerSub.Dispose();
             eventsChangedSub.Dispose();
 
@@ -138,7 +138,7 @@ namespace Gab.ViewModels
                 SetCurrentEvent();
                 return true;
             });
-            
+
             //timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x =>
             //{
             //    Now = DateTime.Now;
@@ -164,7 +164,7 @@ namespace Gab.ViewModels
 
             var startHub = await mrService.ConfigureHub()
                 .OnSuccess(() => mrService.ConnectHub())
-                .OnSuccess(SubscribeToHub);
+                .OnSuccess(() => SubscribeToHub());
 
             if (startHub.IsFailure)
                 return startHub;
@@ -177,7 +177,7 @@ namespace Gab.ViewModels
         {
             var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
 
-            if(CurrentEvent == newCurrentEvent)
+            if (CurrentEvent == newCurrentEvent)
                 return;
 
             if (CurrentEvent != null)
@@ -193,7 +193,7 @@ namespace Gab.ViewModels
                     //((MeetingRoomPage)CurrentPage).EventListView.ScrollTo(CurrentEvent, ScrollToPosition.Start, true);
                     ((MeetingRoomPage)CurrentPage).EventListView.LayoutManager.ScrollToRowIndex(Events.IndexOf(CurrentEvent), ScrollToPosition.Start, true);
                 });
-            }            
+            }
         }
         async Task ExecuteRefreshCommand()
         {
@@ -216,12 +216,12 @@ namespace Gab.ViewModels
                             ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
                         });
 
-                }, AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
+                }, caller: $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
 
                 IsRefreshing = false;
 
                 if (result.IsFailure)
-                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);               
+                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
             }
         }
         async Task ExecuteCreateEventCommand()
@@ -247,7 +247,7 @@ namespace Gab.ViewModels
                 {
                     Events.Add(result.Value.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
                     ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
-                }                  
+                }
             }
         }
         async Task ExecuteEndsEventCommand()
@@ -266,7 +266,7 @@ namespace Gab.ViewModels
                     TimeZone = CurrentTimeZone
                 };
 
-                var result = await Do(async () => await mrService.EndsEvent(ev), 
+                var result = await Do(async () => await mrService.EndsEvent(ev),
                     AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteEndsEventCommand)}");
 
                 if (result.IsFailure)
@@ -287,12 +287,12 @@ namespace Gab.ViewModels
 
                         //other meeting room or meeting room has changed
                         if (e.MeetingRoom != MeetingRoom.Id)
-                        {                            
+                        {
                             if (ev != null)
                                 Events.Remove(ev);
                             return;
                         }
-                        
+
                         switch (e.ChangeType)
                         {
                             case ChangeType.Created:
@@ -321,7 +321,7 @@ namespace Gab.ViewModels
                     {
                         Debug.WriteLine(ex.Message);
                     }
-                });                     
+                });
             });
         }
 

@@ -17,8 +17,8 @@ namespace Gab.Pages
     {
         #region Fields
 
-        double width = 0;
-        double height = 0;
+        double currentWidth = 0;
+        double currentHeight = 0;
 
         #endregion
 
@@ -79,39 +79,48 @@ namespace Gab.Pages
                     },
                     Comparer = new GroupComparer()
                 });
-            });          
+            });
         }
 
         protected override void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height); //must be called
-            if (this.width != width || this.height != height)
+
+            if (currentWidth != width || currentHeight != height)
             {
-                this.width = width;
-                this.height = height;
+                currentWidth = width;
+                currentHeight = height;
 
                 //portrait
-                if (this.height > this.width)
+                if (currentHeight > currentWidth)
                 {
                     ContentLayout.Direction = FlexDirection.Column;
 
-                    BookedLayout.Padding = new Thickness(0,10,0,5);
-                    FreeLayout.Padding = new Thickness(0,10,0,5);
+                    BookedLayout.Padding = new Thickness(0, 10, 0, 5);
+                    FreeLayout.Padding = new Thickness(0, 10, 0, 5);
 
-                    HeaderLayout.HeightRequest = 50;
+                    HeaderLayout.HeightRequest = Device.RuntimePlatform == Device.Android ? 40 : 50;
 
                     if (Device.Idiom == TargetIdiom.Phone)
                     {
-                        FlexLayout.SetGrow(BookedLayout, 0.6f);
-                        FlexLayout.SetGrow(FreeLayout, 0.6f);
-                        FlexLayout.SetGrow(PullToRefresh, 1);
+                        //FlexLayout.SetGrow(BookedLayout, 0.6f);
+                        //FlexLayout.SetGrow(FreeLayout, 0.6f);
+                        //FlexLayout.SetGrow(PullToRefresh, 1);
+
+                        FlexLayout.SetBasis(BookedLayout, new FlexBasis(0.4f, true));
+                        FlexLayout.SetBasis(FreeLayout, new FlexBasis(0.4f, true));
+                        FlexLayout.SetBasis(PullToRefresh, new FlexBasis(0.6f, true));
                     }
                     else
                     {
-                        FlexLayout.SetGrow(BookedLayout, 0.8f);
-                        FlexLayout.SetGrow(FreeLayout, 0.8f);
-                        FlexLayout.SetGrow(PullToRefresh, 1);
-                    }                
+                        //FlexLayout.SetGrow(BookedLayout, 0.8f);
+                        //FlexLayout.SetGrow(FreeLayout, 0.8f);
+                        //FlexLayout.SetGrow(PullToRefresh, 1);
+
+                        FlexLayout.SetBasis(BookedLayout, new FlexBasis(0.45f, true));
+                        FlexLayout.SetBasis(FreeLayout, new FlexBasis(0.45f, true));
+                        FlexLayout.SetBasis(PullToRefresh, new FlexBasis(0.55f, true));
+                    }
                 }
                 else
                 {
@@ -119,12 +128,16 @@ namespace Gab.Pages
 
                     HeaderLayout.HeightRequest = 40;
 
-                    BookedLayout.Padding = new Thickness(0,10,0,10);
-                    FreeLayout.Padding = new Thickness(0,10,0,10);
+                    BookedLayout.Padding = new Thickness(0, 10, 0, 10);
+                    FreeLayout.Padding = new Thickness(0, 10, 0, 10);
 
-                    FlexLayout.SetGrow(BookedLayout, 1);
-                    FlexLayout.SetGrow(FreeLayout, 1);
-                    FlexLayout.SetGrow(PullToRefresh, 1f);
+                    //FlexLayout.SetGrow(BookedLayout, 1);
+                    //FlexLayout.SetGrow(FreeLayout, 1);
+                    //FlexLayout.SetGrow(PullToRefresh, 1f);
+
+                    FlexLayout.SetBasis(BookedLayout, new FlexBasis(0.55f, true));
+                    FlexLayout.SetBasis(FreeLayout, new FlexBasis(0.55f, true));
+                    FlexLayout.SetBasis(PullToRefresh, new FlexBasis(0.45f, true));
                 }
             }
         }

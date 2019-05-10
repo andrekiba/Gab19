@@ -35,6 +35,7 @@ namespace Gab.Shared.Models
             Organizer = e.Organizer;
             Subject = e.Subject;
             TimeZone = e.TimeZone;
+            MeetingRoom = e.MeetingRoom;
 
             return this;
         }
@@ -52,7 +53,16 @@ namespace Gab.Shared.Models
 
         public bool Equals(Event other)
         {
-            return other != null && other.Id == Id;
+            return other != null &&
+                   //other.Id == Id &&
+                   other.Start == Start &&
+                   other.End == End &&
+                   other.Organizer == Organizer &&
+                   other.Subject == Subject &&
+                   other.BodyPreview == BodyPreview &&
+                   other.MeetingRoom == MeetingRoom &&
+                   other.TimeZone == TimeZone &&
+                   other.ChangeType == ChangeType;
         }
 
         public override int GetHashCode() => Id.GetHashCode();
@@ -66,10 +76,10 @@ namespace Gab.Shared.Models
             if (ReferenceEquals(ev1, ev2))
                 return true;
 
-            if (ReferenceEquals(ev1, null))
+            if (ev1 is null)
                 return false;
-            
-            if (ReferenceEquals(ev2, null))
+
+            if (ev2 is null)
                 return false;
 
             return ev1.Equals(ev2);
