@@ -6,9 +6,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.AuthTokens" Version="1.0.0-beta6" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.5" />
-    <PackageReference Include="Microsoft.Graph" Version="1.14.0" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.26" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.6" />
+    <PackageReference Include="Microsoft.Graph" Version="1.15.0" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
     <PackageReference Include="Serilog.Sinks.AzureTableStorage" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>

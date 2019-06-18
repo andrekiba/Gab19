@@ -83,16 +83,16 @@
       <Version>1.4.1-beta</Version>
     </PackageReference>
     <PackageReference Include="Syncfusion.Xamarin.SfListView">
-      <Version>17.1.0.42</Version>
+      <Version>17.1.0.51</Version>
     </PackageReference>
     <PackageReference Include="Syncfusion.Xamarin.SfProgressBar">
-      <Version>17.1.0.42</Version>
+      <Version>17.1.0.51</Version>
     </PackageReference>
     <PackageReference Include="Syncfusion.Xamarin.SfPullToRefresh">
-      <Version>17.1.0.42</Version>
+      <Version>17.1.0.51</Version>
     </PackageReference>
     <PackageReference Include="Syncfusion.Xamarin.SfSchedule">
-      <Version>17.1.0.42</Version>
+      <Version>17.1.0.51</Version>
     </PackageReference>
     <PackageReference Include="Xam.Plugin.Connectivity">
       <Version>3.2.0</Version>

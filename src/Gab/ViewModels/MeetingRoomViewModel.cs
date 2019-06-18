@@ -100,10 +100,10 @@ namespace Gab.ViewModels
             base.ViewIsDisappearing(sender, e);
 
             //timeTimerSub.Dispose();
-            eventsChangedSub.Dispose();
+            eventsChangedSub?.Dispose();
 
             await mrService.DisconnectHub();
-            eventChangedSub.Dispose();
+            eventChangedSub?.Dispose();
         }
 
         #endregion

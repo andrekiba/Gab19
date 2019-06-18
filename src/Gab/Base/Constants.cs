@@ -10,12 +10,13 @@ namespace Gab.Base
         //azure
         //public const string MeetingRoomsApi = "http://localhost:7071/api";       
         //public const string MeetingRoomsApi = "https://9cc4fcd1.ngrok.io/api";
-        public const string MeetingRoomsApi = "your azure functions url";
+        //public const string MeetingRoomsApi = "your azure functions url";
         public const string MeetingRoomsFuncKey = "your azure functions key";
+        public const string MeetingRoomsApi = "https://gab19.azurewebsites.net/api";
         public static string NotificationUrl => $"{MeetingRoomsApi}/notification";
 
         //syncfusion
-        public const string SyncfusionLicenseKey = "";
+        public const string SyncfusionLicenseKey = "MTExODExQDMxMzcyZTMxMmUzMFM5eHNqcnNHTDJOS29KbllxY1BMaWFlMDRlamZKaHBVQVIzVVphY1RJVlk9";
 
         public static class Colors
         {
