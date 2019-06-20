@@ -171,4 +171,7 @@
   <data name="RoomItWillBeBusySoonMessage" xml:space="preserve">
     <value>Room it will be busy soon!</value>
   </data>
+  <data name="EndMeetingConfirmMessage" xml:space="preserve">
+    <value>Do you really want to end the meeting?</value>
+  </data>
 </root>

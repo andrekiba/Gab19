@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:lv="clr-namespace:Syncfusion.ListView.XForms;assembly=Syncfusion.SfListView.XForms"
@@ -110,7 +110,7 @@
                         JustifyContent="SpaceBetween">
 
                 <StackLayout Spacing="5">
-                    <Label Text="{Binding Now, StringFormat='{}{0:hh\\:mm dddd, MMMM dd}'}"
+                    <Label Text="{Binding Now, StringFormat='{}{0:HH:mm dddd, dd MMMM}'}"
                            TextColor="White" FontSize="Large"
                            HorizontalOptions="Center" VerticalOptions="Start"/>
                     <Label Text="{Binding Resources[BookedLabel]}" TextColor="White"

@@ -15,7 +15,6 @@ using Gab.Shared.Models;
 using MvvmHelpers;
 using Plugin.Connectivity;
 using PropertyChanged;
-using Syncfusion.DataSource;
 using Xamarin.Forms;
 using ScrollToPosition = Syncfusion.ListView.XForms.ScrollToPosition;
 
@@ -26,7 +25,6 @@ namespace Gab.ViewModels
         #region Fields
 
         readonly IMeetingRoomsService mrService;
-        //IDisposable timeTimerSub;
         IDisposable eventChangedSub;
         IDisposable eventsChangedSub;
         const string CurrentTimeZone = "W. Europe Standard Time";
@@ -99,7 +97,6 @@ namespace Gab.ViewModels
         {
             base.ViewIsDisappearing(sender, e);
 
-            //timeTimerSub.Dispose();
             eventsChangedSub?.Dispose();
 
             await mrService.DisconnectHub();
@@ -139,18 +136,12 @@ namespace Gab.ViewModels
                 return true;
             });
 
-            //timeTimerSub = Observable.Timer(TimeSpan.FromMinutes(1)).Subscribe(x =>
-            //{
-            //    Now = DateTime.Now;
-            //    SetCurrentEvent();
-            //});
-
             eventsChangedSub = Events.WhenCollectionChanged().Subscribe(x =>
             {
                 SetCurrentEvent();
             });
 
-            var subscription = await mrService.Subscribe(new CreateSubscription
+            var graphSubscription = await mrService.Subscribe(new CreateSubscription
             {
                 Resource = $"users/{MeetingRoom.Id}/events",
                 ChangeType = "created,updated,deleted",
@@ -159,8 +150,8 @@ namespace Gab.ViewModels
                 ClientState = "superSegreto"
             });
 
-            if (subscription.IsFailure)
-                return subscription;
+            if (graphSubscription.IsFailure)
+                return graphSubscription;
 
             var startHub = await mrService.ConfigureHub()
                 .OnSuccess(() => mrService.ConnectHub())
@@ -173,108 +164,7 @@ namespace Gab.ViewModels
 
             return addToGroup.IsFailure ? addToGroup : Result.Ok();
         }
-        void SetCurrentEvent()
-        {
-            var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
 
-            if (CurrentEvent == newCurrentEvent)
-                return;
-
-            if (CurrentEvent != null)
-                CurrentEvent.IsCurrent = false;
-
-            CurrentEvent = newCurrentEvent;
-            if (CurrentEvent != null)
-            {
-                CurrentEvent.IsCurrent = true;
-                //Events.RemoveRange(Events.Where(e => e.End.AddSeconds(-1) < CurrentEvent.Start));
-                Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    //((MeetingRoomPage)CurrentPage).EventListView.ScrollTo(CurrentEvent, ScrollToPosition.Start, true);
-                    ((MeetingRoomPage)CurrentPage).EventListView.LayoutManager.ScrollToRowIndex(Events.IndexOf(CurrentEvent), ScrollToPosition.Start, true);
-                });
-            }
-        }
-        async Task ExecuteRefreshCommand()
-        {
-            if (!CrossConnectivity.Current.IsConnected)
-            {
-                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
-            }
-            else
-            {
-                IsRefreshing = true;
-
-                var result = await Do(async () =>
-                {
-                    return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1))
-                        .OnFailure(error => Events.Clear())
-                        .OnSuccess(events =>
-                        {
-                            var convEvents = events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
-                            Events.ReplaceRange(convEvents);
-                            ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
-                        });
-
-                }, caller: $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
-
-                IsRefreshing = false;
-
-                if (result.IsFailure)
-                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
-            }
-        }
-        async Task ExecuteCreateEventCommand()
-        {
-            if (!CrossConnectivity.Current.IsConnected)
-            {
-                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
-            }
-            else
-            {
-                var createEvent = new CreateEvent
-                {
-                    MeetingRoom = MeetingRoom,
-                    TimeZone = CurrentTimeZone
-                };
-
-                var result = await Do(async () => await mrService.CreateEvent(createEvent),
-                    AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteCreateEventCommand)}");
-
-                if (result.IsFailure)
-                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
-                else
-                {
-                    Events.Add(result.Value.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
-                    ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
-                }
-            }
-        }
-        async Task ExecuteEndsEventCommand()
-        {
-            if (!CrossConnectivity.Current.IsConnected)
-            {
-                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
-            }
-            else
-            {
-                var ev = new EndsEvent
-                {
-                    Id = CurrentEvent.Id,
-                    MeetingRoom = MeetingRoom,
-                    Ended = DateTime.Now.ToString("s"),
-                    TimeZone = CurrentTimeZone
-                };
-
-                var result = await Do(async () => await mrService.EndsEvent(ev),
-                    AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteEndsEventCommand)}");
-
-                if (result.IsFailure)
-                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
-                else
-                    CurrentEvent.IsCurrent = false;
-            }
-        }
         void SubscribeToHub()
         {
             eventChangedSub = mrService.WhenEventChanged.Subscribe(e =>
@@ -315,7 +205,7 @@ namespace Gab.ViewModels
                                 throw new ArgumentOutOfRangeException();
                         }
 
-                        ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
+                        //((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
                     }
                     catch (Exception ex)
                     {
@@ -323,6 +213,129 @@ namespace Gab.ViewModels
                     }
                 });
             });
+        }
+
+        void SetCurrentEvent()
+        {
+            var newCurrentEvent = Events.SingleOrDefault(e => e.Start < Now && e.End > Now);
+
+            if (newCurrentEvent != null)
+                newCurrentEvent.IsCurrent = true;
+            else
+            {
+                foreach (var e in Events)
+                    e.IsCurrent = false;
+            }
+                
+            //if (CurrentEvent == newCurrentEvent)
+            //    return;
+
+            //if (CurrentEvent != null)
+            //    CurrentEvent.IsCurrent = false;
+
+            CurrentEvent = newCurrentEvent;
+
+            if (CurrentEvent != null)
+            {
+                Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    //((MeetingRoomPage)CurrentPage).EventListView.ScrollTo(CurrentEvent, ScrollToPosition.Start, true);
+                    ((MeetingRoomPage)CurrentPage).EventListView.LayoutManager.ScrollToRowIndex(Events.IndexOf(CurrentEvent), ScrollToPosition.Start, true);
+                });
+            }
+
+            ((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
+        }
+
+        async Task ExecuteRefreshCommand()
+        {
+            if (!CrossConnectivity.Current.IsConnected)
+            {
+                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
+            }
+            else
+            {
+                IsRefreshing = true;
+
+                var result = await Do(async () =>
+                {
+                    return await mrService.GetCalendarView(MeetingRoom.Id, DateTime.Today, DateTime.Today.AddDays(2).AddSeconds(-1))
+                        .OnFailure(error => Events.Clear())
+                        .OnSuccess(events =>
+                        {
+                            var convEvents = events.Select(e => e.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
+                            Events.ReplaceRange(convEvents);
+                            //((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
+                        });
+
+                }, caller: $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
+
+                IsRefreshing = false;
+
+                if (result.IsFailure)
+                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
+            }
+        }
+
+        async Task ExecuteCreateEventCommand()
+        {
+            if (!CrossConnectivity.Current.IsConnected)
+            {
+                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
+            }
+            else
+            {
+                var createEvent = new CreateEvent
+                {
+                    MeetingRoom = MeetingRoom,
+                    TimeZone = CurrentTimeZone
+                };
+
+                var result = await Do(async () => await mrService.CreateEvent(createEvent),
+                    AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteCreateEventCommand)}");
+
+                if (result.IsFailure)
+                    await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
+                else
+                {
+                    Events.Add(result.Value.ConvertTimeToTimeZone(CurrentXamarinTimeZone));
+                    //((MeetingRoomPage)CurrentPage).SortAndGroupEventList();
+                }
+            }
+        }
+
+        async Task ExecuteEndsEventCommand()
+        {
+            if (!CrossConnectivity.Current.IsConnected)
+            {
+                await UserDialogs.Instance.AlertAsync(AppResources.OfflineMessage, AppResources.Warning, AppResources.Ok);
+            }
+            else
+            {
+                var confirm = await UserDialogs.Instance.ConfirmAsync(AppResources.EndMeetingConfirmMessage, AppResources.Confirm, AppResources.Ok, AppResources.Cancel);
+
+                if (confirm)
+                {
+                    var ev = new EndsEvent
+                    {
+                        Id = CurrentEvent.Id,
+                        MeetingRoom = MeetingRoom,
+                        Ended = DateTime.Now.ToString("s"),
+                        TimeZone = CurrentTimeZone
+                    };
+
+                    var result = await Do(async () => await mrService.EndsEvent(ev),
+                        AppResources.LoadingMessage, $"{GetType().Name} {nameof(ExecuteEndsEventCommand)}");
+
+                    if (result.IsFailure)
+                        await UserDialogs.Instance.AlertAsync(result.Error, AppResources.Error, AppResources.Ok);
+                    else
+                    {
+                        CurrentEvent.IsCurrent = false;
+                        //CurrentEvent = null;
+                    }
+                }   
+            }
         }
 
         #endregion 

@@ -28,7 +28,7 @@ namespace Gab.Functions
 {
     public class MeetingRoomsApi
     {
-        #region Field
+        #region Fields
 
         readonly AppSettings configuration;
         readonly ILogger log;

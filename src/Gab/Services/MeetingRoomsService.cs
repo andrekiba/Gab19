@@ -56,12 +56,14 @@ namespace Gab.Services
         #endregion
 
         #region Properties
+
         public bool IsHubConnected { get; private set; }
         public IObservable<Event> WhenEventChanged => eventChanged.AsObservable();
 
-        #endregion 
+        #endregion
 
         #region Constructor
+
         public MeetingRoomsService()
         {
             try
