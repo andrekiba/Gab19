@@ -51,17 +51,10 @@ namespace Gab
 
         public void SetStartPage()
         {
-            try
-            {
-                var mainPage = FreshPageModelResolver.ResolvePageModel<MeetingRoomsViewModel>();
-                var mainContainer = new FreshIconAnimationNavigationContainer(mainPage);
+            var mainPage = FreshPageModelResolver.ResolvePageModel<MeetingRoomsViewModel>();
+            var mainContainer = new FreshIconAnimationNavigationContainer(mainPage);
 
-                MainPage = mainContainer;
-            }
-            catch (System.Exception ex)
-            {
-                throw;
-            } 
+            MainPage = mainContainer;
         }
 
         static void SetupIoc()

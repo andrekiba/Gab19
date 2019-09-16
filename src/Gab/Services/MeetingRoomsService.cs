@@ -31,19 +31,20 @@ namespace Gab.Services
         readonly Subject<Event> eventChanged = new Subject<Event>();
 
         readonly IMeetingRoomsApi api;
-        // Riprova 2 volte
-        // 2 ^ 1 = 2 => la prima volta dopo 2 secondi
-        // 2 ^ 2 = 4 => la seconda volta dopo 4 secondi
+
+        // retry 2 times
+        // 2 ^ 1 = 2 => first one after 2 seconds
+        // 2 ^ 2 = 4 => second one after 4 seconds
         readonly AsyncRetryPolicy retryPolicy = Policy.Handle<Exception>()
             .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, timeSpan, context) =>
                 {
-                    //var exType = exception.GetType();
-                    //Debug.WriteLine(string.Concat("Policy Error: ", exType.ToString(), " ", exception.Message));
-                    // loggare su Insights e HockeyApp
+                    var exType = exception.GetType();
+                    Debug.WriteLine(string.Concat("Policy Error: ", exType.ToString(), " ", exception.Message));
+                    //log
                 });
-        //se va in timeout oppure è un errore dell'api non tenterà di fare il retry
-        //circuit break per 20 secondi
+        
+        //incase of timeout or api error circuit break for 20 seconds
         readonly AsyncCircuitBreakerPolicy breakPolicy = Policy.Handle<OperationCanceledException>()
             .Or<ApiException>()
             .CircuitBreakerAsync(1, TimeSpan.FromSeconds(20),

@@ -355,12 +355,11 @@ namespace Gab.Functions
                 log.Error(error);
                 return new ObjectResult(StatusCodes.Status500InternalServerError);
             }
-        }
+        }     
 
-        [FunctionName("NotifierTest")]
-        public async Task NotifierTest(
-            
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "notifierTest")] Notification notification,
+        [FunctionName("Notifier")]
+        public async Task Notifier(
+            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification,
             [SignalR(HubName = "gab19")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
             try
@@ -382,7 +381,7 @@ namespace Gab.Functions
                         ChangeType = ChangeType.Deleted
                     };
                 }
-                
+
                 await signalRMessages.AddAsync(
                     new SignalRMessage
                     {
@@ -396,11 +395,46 @@ namespace Gab.Functions
                 var error = $"{e.Message}\n\r{e.StackTrace}";
                 log.Error(error);
             }
+        }        
+
+        [FunctionName("Negotiate")]
+        public SignalRConnectionInfo Negotiate(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
+            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
+        {
+            return connectionInfo;
         }
 
-        [FunctionName("Notifier")]
-        public async Task Notifier(
-            [QueueTrigger("notifications", Connection = "AzureWebJobsStorage")]Notification notification,
+        [FunctionName("AddToHubGroup")]
+        public async Task<IActionResult> AddToHubGroup(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addToHubGroup/{userId}")]HttpRequest req,
+            string userId,
+            [SignalR(HubName = "gab19")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
+        {
+            try
+            {
+                await signalRGroupActions.AddAsync(new SignalRGroupAction
+                {
+                    UserId = userId,
+                    GroupName = userId,
+                    Action = GroupAction.Add
+                });
+
+                return new OkObjectResult(Result.Ok());
+            }
+            catch (Exception e)
+            {
+                var error = $"{e.Message}\n\r{e.StackTrace}";
+                log.Error(error);
+                return new OkObjectResult(Result.Fail(error));
+            }
+        }
+
+        #region Test
+
+        [FunctionName("NotifierTest")]
+        public async Task NotifierTest(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "notifierTest")] Notification notification,
             [SignalR(HubName = "gab19")] IAsyncCollector<SignalRMessage> signalRMessages)
         {
             try
@@ -460,38 +494,7 @@ namespace Gab.Functions
             }
         }
 
-        [FunctionName("Negotiate")]
-        public SignalRConnectionInfo Negotiate(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")] HttpRequest req,
-            [SignalRConnectionInfo(HubName = "gab19")] SignalRConnectionInfo connectionInfo)
-        {
-            return connectionInfo;
-        }
-
-        [FunctionName("AddToHubGroup")]
-        public async Task<IActionResult> AddToHubGroup(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "addToHubGroup/{userId}")]HttpRequest req,
-            string userId,
-            [SignalR(HubName = "gab19")] IAsyncCollector<SignalRGroupAction> signalRGroupActions)
-        {
-            try
-            {
-                await signalRGroupActions.AddAsync(new SignalRGroupAction
-                {
-                    UserId = userId,
-                    GroupName = userId,
-                    Action = GroupAction.Add
-                });
-
-                return new OkObjectResult(Result.Ok());
-            }
-            catch (Exception e)
-            {
-                var error = $"{e.Message}\n\r{e.StackTrace}";
-                log.Error(error);
-                return new OkObjectResult(Result.Fail(error));
-            }
-        }
+        #endregion 
 
         #endregion
 
