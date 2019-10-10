@@ -18,9 +18,9 @@
           </ResourceDictionary>
       </Grid.Resources>
 
-        <Grid.Behaviors>
+        <!--<Grid.Behaviors>
             <behaviors:MeetingRoomColoringBehavior ObservableCollection="{Binding Path=ParentBindingContext.MeetingRooms, Source={x:Reference MeetingRoomCellName}}"/>
-        </Grid.Behaviors>
+        </Grid.Behaviors>-->
 
       <Grid.ColumnDefinitions>
           <ColumnDefinition Width="60"/>

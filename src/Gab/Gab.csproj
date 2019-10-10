@@ -23,6 +23,7 @@
     <PackageReference Include="Syncfusion.Xamarin.SfProgressBar" Version="17.1.0.51" />
     <PackageReference Include="Syncfusion.Xamarin.SfPullToRefresh" Version="17.1.0.51" />
     <PackageReference Include="Syncfusion.Xamarin.SfSchedule" Version="17.1.0.51" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.5.3" />
     <PackageReference Include="Xam.Plugin.Connectivity" Version="3.2.0" />
     <PackageReference Include="Xam.Plugin.Iconize" Version="3.5.0.123" />
     <PackageReference Include="Xam.Plugin.Iconize.FontAwesome" Version="3.5.0.123" />

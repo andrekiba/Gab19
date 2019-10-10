@@ -12,9 +12,10 @@ namespace Gab.Functions.Configuration
         public string GraphV1 { get; }
         public string GraphBeta { get; }
         public string MeetingRoomsApi { get; }
+        public string MeetingRoomsUserId { get; }
 
 
-        readonly IConfigurationRoot config;
+		readonly IConfigurationRoot config;
 
         public AppSettings()
         {
@@ -30,7 +31,8 @@ namespace Gab.Functions.Configuration
             GraphV1 = $"{GraphBaseUrl}v1.0";
             GraphBeta = $"{GraphBaseUrl}beta";
             MeetingRoomsApi = config.GetValue<string>("MeetingRoomsApi");
-        }
+            MeetingRoomsUserId = config.GetValue<string>("MeetingRoomsUserId");
+		}
 
         public string GetValue(string key) => config.GetValue<string>(key);
     }

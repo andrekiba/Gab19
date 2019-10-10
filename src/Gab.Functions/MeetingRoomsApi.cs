@@ -57,7 +57,7 @@ namespace Gab.Functions
                 var graphClient = GetGraphClient(configuration.GraphV1);
 
                 //use default user
-                var result = await graphClient.Users["b46397cf-4e6f-4f3d-9134-0d8b70646548"].People.Request()
+                var result = await graphClient.Users[configuration.GetValue("MeetingRoomsUserId")].People.Request()
                     .Filter("personType/subclass eq 'Room'")
                     .GetAsync();
 
@@ -70,10 +70,10 @@ namespace Gab.Functions
 
                 return new OkObjectResult(Result.Ok(meetingRooms));
 
-                //var client = await GetGraphHttpClient();
-                //await client.GetAsync("https://graph.microsoft.com/beta/users/0e17c9c5-9a12-47fd-b7dc-44f53a986dd6/findRooms");
-            }
-            catch (Exception e)
+				//var client = await GetGraphHttpClient();
+				//await client.GetAsync($"https://graph.microsoft.com/beta/users/{configuration.GetValue("MeetingRoomsUserId")}/findRooms");
+			}
+			catch (Exception e)
             {
                 var error = $"{e.Message}\n\r{e.StackTrace}";
                 log.Error(error);

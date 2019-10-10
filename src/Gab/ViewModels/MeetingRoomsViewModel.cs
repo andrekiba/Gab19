@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
+using Gab.Base;
 using Gab.Resources;
 using Gab.Services;
 using Gab.Shared.Base;
@@ -20,12 +23,13 @@ namespace Gab.ViewModels
         readonly IMeetingRoomsService mrService;
         Timer refreshTimer;
         bool refreshNeeded = true;
+        IDisposable coloringSub;
 
-        #endregion
+		#endregion
 
-        #region Properties
+		#region Properties
 
-        public ObservableRangeCollection<MeetingRoom> MeetingRooms { get; set; } = new ObservableRangeCollection<MeetingRoom>();
+		public ObservableRangeCollection<MeetingRoom> MeetingRooms { get; set; } = new ObservableRangeCollection<MeetingRoom>();
 
         public bool IsRefreshing { get; set; }
 
@@ -51,13 +55,26 @@ namespace Gab.ViewModels
         protected override void ViewIsAppearing(object sender, EventArgs e)
         {
             base.ViewIsAppearing(sender, e);
-            if (!refreshNeeded)
+
+            coloringSub = MeetingRooms.WhenCollectionChanged().Subscribe(x =>
+            {
+	            SetColors(MeetingRooms);
+            });
+
+			if (!refreshNeeded)
                 return;
 
             refreshNeeded = false;
             refreshTimer.Start();
             RefreshCommand.Execute(null);
         }
+
+        protected override void ViewIsDisappearing(object sender, EventArgs e)
+        {
+	        base.ViewIsDisappearing(sender, e);
+
+	        coloringSub?.Dispose();
+		}
 
         #endregion
 
@@ -93,6 +110,7 @@ namespace Gab.ViewModels
                 {
                     return await mrService.GetMeetingRooms()
                         .OnFailure(error => MeetingRooms.Clear())
+                        //.OnSuccess(SetColors)
                         .OnSuccess(mrs => MeetingRooms.ReplaceRange(mrs));
 
                 }, caller: $"{GetType().Name} {nameof(ExecuteRefreshCommand)}");
@@ -104,6 +122,17 @@ namespace Gab.ViewModels
             }
         }
 
-        #endregion 
-    }
+        static void SetColors(ICollection<MeetingRoom> meetingRooms)
+        {
+	        var colors = Constants.Colors.MeetingRoomColors;
+
+	        foreach (var (mr, index) in meetingRooms.Select((mr, i) => (mr, i)))
+	        {
+		        var color = colors[(meetingRooms.Count - index - 1) % colors.Count];
+		        mr.Color = color.ToHex();
+	        }
+        }
+
+		#endregion
+	}
 }
